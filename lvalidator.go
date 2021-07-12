@@ -41,10 +41,21 @@ func (v *Valid) ValidJson(rules map[string]interface{}, data interface{}) error 
 	return nil
 }
 
-func (v *Valid) ValidXml(data interface{}) error {
+func (v *Valid) ValidXml(rules map[string]interface{}, data interface{}) error {
+	ruleList, err := Func.parseRules(rules)
+	if err != nil {
+		return err
+	}
 	body := Func.readBody(v.request)
 	if err := xml.Unmarshal(body, data); err != nil {
 		return err
+	}
+	newData := reflect.ValueOf(data).Elem().Interface()
+	for _, rule := range ruleList {
+		err := v.validRule(newData, rule)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
