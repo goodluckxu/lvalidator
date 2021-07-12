@@ -13,6 +13,5 @@ func (z *ZhCn) Init() {
 	z.Gte = "{ruleKey}必须大于等于{ruleValue}"
 	z.Lt = "{ruleKey}必须小于{ruleValue}"
 	z.Lte = "{ruleKey}必须小于等于{ruleValue}"
-	z.Eq = "{ruleKey}必须等于{ruleValue}"
 	z.Date = "{ruleKey}必须是日期格式"
 }

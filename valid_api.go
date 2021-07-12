@@ -197,32 +197,6 @@ func (v validApi) Lte(data interface{}, ruleKey string, ruleValue string) error 
 	return nil
 }
 
-// 验证等于
-func (v validApi) Eq(data interface{}, ruleKey string, ruleValue string) error {
-	ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
-	info := strings.ReplaceAll(Lang.Eq, "{ruleKey}", ruleKey)
-	info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
-	rs := errors.New(info)
-	if data == nil {
-		return rs
-	}
-	dataValue := reflect.ValueOf(data)
-	if dataValue.Kind() == reflect.Float64 && data.(float64) != ruleValueFloat64 {
-		return rs
-	} else if dataValue.Kind() == reflect.String {
-		dataFloat64, err := strconv.ParseFloat(data.(string), 64)
-		if err != nil {
-			return rs
-		}
-		if dataFloat64 != ruleValueFloat64 {
-			return rs
-		}
-	} else {
-		return rs
-	}
-	return nil
-}
-
 // 验证日期
 func (v validApi) Date(data interface{}, ruleKey string) error {
 	info := strings.ReplaceAll(Lang.Date, "{ruleKey}", ruleKey)

@@ -9,6 +9,5 @@ type Lang struct {
 	Gte      string // 大于等于
 	Lt       string // 小于
 	Lte      string // 小于等于
-	Eq       string // 等于
 	Date     string // 日期 Y-m-d H:i:s
 }
