@@ -4,21 +4,21 @@ golang 中使用 *http.Request 验证数据
 目前支持解析ValidJson,ValidXml
 
 ## 用法
-验证规则可以使用英文状态的分号 ; 分隔，也可以定义成 []interface{} 类型
+验证规则可以使用 | 分隔，也可以定义成 []interface{} 类型
 ~~~go
 var data interface{}
 valid := lvalidator.New(c.Request)
 err := valid.ValidJson(map[string]interface{}{
-    "a": "sort:1;notes:测试;required;number;integer;gt:1;gte:3;lt:15;lte:10",
+    "a": "sort:1|notes:测试|required|number|integer|gt:1|gte:3|lt:15|lte:10",
     "b": []interface{}{
         "sort:2",
         "notes:飞机",
         "date",
         func(value interface{}) error {
-            return errors.New("验证失败")
+            return nil
         },
     },
-    "c": "",
+    "c": "string|min:2|max:4",
 }, &data)
 ~~~
 
@@ -43,15 +43,20 @@ func(value interface{}) error {
 ~~~
 
 ## 所有验证规则
-[required](#required)必填
-[string](#string)字符串
-[number](#number)数字
-[integer](#integer)整数
-[gt](#gt)大于
-[gte](#gte)大于等于
-[lt](#lt)小于
-[lte](#lte)小于等于
-[date](#date)日期
+[required](#required) |
+[array](#array) |
+[map](#map) |
+[string](#string) |
+[len](#len) |
+[min](#min) |
+[max](#max) |
+[number](#number) |
+[integer](#integer) |
+[gt](#gt) |
+[gte](#gte) |
+[lt](#lt) |
+[lte](#lte) |
+[date](#date)
 
 #### <a id="required">required规则</a>
 验证是否必填。null，字符串为""，数字类型为0，bool类型为false，数组为[]都不通过
@@ -59,10 +64,40 @@ func(value interface{}) error {
 required
 ~~~
 
+#### <a id="array">array规则</a>
+验证是否是数组
+~~~
+array
+~~~
+
+#### <a id="map">map规则</a>
+验证是否是对象
+~~~
+map
+~~~
+
 #### <a id="string">string规则</a>
 验证是否是字符串
 ~~~
 string
+~~~
+
+#### <a id="len">len规则</a>
+验证是长度等于某个数。可获取字符串和数组长度
+~~~
+len:5
+~~~
+
+#### <a id="min">min规则</a>
+验证是长度大于等于某个数。可获取字符串和数组长度
+~~~
+min:5
+~~~
+
+#### <a id="max">max规则</a>
+验证是长度小于等于某个数。可获取字符串和数组长度
+~~~
+max:5
 ~~~
 
 #### <a id="number">number规则</a>

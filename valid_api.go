@@ -38,6 +38,32 @@ func (v validApi) Required(data interface{}, ruleKey string) error {
 	return nil
 }
 
+// 验证数组
+func (v validApi) Array(data interface{}, ruleKey string) error {
+	rs := errors.New(strings.ReplaceAll(Lang.Array, "{ruleKey}", ruleKey))
+	if data == nil {
+		return rs
+	}
+	dataValue := reflect.ValueOf(data)
+	if dataValue.Kind() == reflect.Slice {
+		return nil
+	}
+	return rs
+}
+
+// 验证对象
+func (v validApi) Map(data interface{}, ruleKey string) error {
+	rs := errors.New(strings.ReplaceAll(Lang.Map, "{ruleKey}", ruleKey))
+	if data == nil {
+		return rs
+	}
+	dataValue := reflect.ValueOf(data)
+	if dataValue.Kind() == reflect.Map {
+		return nil
+	}
+	return rs
+}
+
 // 验证字符串
 func (v validApi) String(data interface{}, ruleKey string) error {
 	rs := errors.New(strings.ReplaceAll(Lang.String, "{ruleKey}", ruleKey))
@@ -46,6 +72,60 @@ func (v validApi) String(data interface{}, ruleKey string) error {
 	}
 	dataValue := reflect.ValueOf(data)
 	if dataValue.Kind() == reflect.String {
+		return nil
+	}
+	return rs
+}
+
+// 验证长度相等
+func (v validApi) Len(data interface{}, ruleKey string, ruleValue string) error {
+	ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
+	info := strings.ReplaceAll(Lang.Len, "{ruleKey}", ruleKey)
+	info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
+	rs := errors.New(info)
+	if data == nil {
+		return rs
+	}
+	dataValue := reflect.ValueOf(data)
+	if dataValue.Kind() == reflect.String && len(data.(string)) == int(ruleValueFloat64) {
+		return nil
+	} else if dataValue.Kind() == reflect.Slice && len(data.([]interface{})) == int(ruleValueFloat64) {
+		return nil
+	}
+	return rs
+}
+
+// 验证长度相等
+func (v validApi) Min(data interface{}, ruleKey string, ruleValue string) error {
+	ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
+	info := strings.ReplaceAll(Lang.Min, "{ruleKey}", ruleKey)
+	info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
+	rs := errors.New(info)
+	if data == nil {
+		return rs
+	}
+	dataValue := reflect.ValueOf(data)
+	if dataValue.Kind() == reflect.String && len(data.(string)) >= int(ruleValueFloat64) {
+		return nil
+	} else if dataValue.Kind() == reflect.Slice && len(data.([]interface{})) >= int(ruleValueFloat64) {
+		return nil
+	}
+	return rs
+}
+
+// 验证长度相等
+func (v validApi) Max(data interface{}, ruleKey string, ruleValue string) error {
+	ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
+	info := strings.ReplaceAll(Lang.Max, "{ruleKey}", ruleKey)
+	info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
+	rs := errors.New(info)
+	if data == nil {
+		return rs
+	}
+	dataValue := reflect.ValueOf(data)
+	if dataValue.Kind() == reflect.String && len(data.(string)) <= int(ruleValueFloat64) {
+		return nil
+	} else if dataValue.Kind() == reflect.Slice && len(data.([]interface{})) <= int(ruleValueFloat64) {
 		return nil
 	}
 	return rs
@@ -62,13 +142,11 @@ func (v validApi) Number(data interface{}, ruleKey string) error {
 		return nil
 	} else if dataValue.Kind() == reflect.String {
 		_, err := strconv.ParseFloat(data.(string), 64)
-		if err != nil {
-			return rs
+		if err == nil {
+			return nil
 		}
-	} else {
-		return rs
 	}
-	return nil
+	return rs
 }
 
 // 验证整数
@@ -103,20 +181,18 @@ func (v validApi) Gt(data interface{}, ruleKey string, ruleValue string) error {
 		return rs
 	}
 	dataValue := reflect.ValueOf(data)
-	if dataValue.Kind() == reflect.Float64 && data.(float64) <= ruleValueFloat64 {
-		return rs
+	if dataValue.Kind() == reflect.Float64 && data.(float64) > ruleValueFloat64 {
+		return nil
 	} else if dataValue.Kind() == reflect.String {
 		dataFloat64, err := strconv.ParseFloat(data.(string), 64)
 		if err != nil {
 			return rs
 		}
-		if dataFloat64 <= ruleValueFloat64 {
-			return rs
+		if dataFloat64 > ruleValueFloat64 {
+			return nil
 		}
-	} else {
-		return rs
 	}
-	return nil
+	return rs
 }
 
 // 验证大于等于
@@ -129,18 +205,16 @@ func (v validApi) Gte(data interface{}, ruleKey string, ruleValue string) error 
 		return rs
 	}
 	dataValue := reflect.ValueOf(data)
-	if dataValue.Kind() == reflect.Float64 && data.(float64) < ruleValueFloat64 {
-		return rs
+	if dataValue.Kind() == reflect.Float64 && data.(float64) >= ruleValueFloat64 {
+		return nil
 	} else if dataValue.Kind() == reflect.String {
 		dataFloat64, err := strconv.ParseFloat(data.(string), 64)
 		if err != nil {
 			return rs
 		}
-		if dataFloat64 < ruleValueFloat64 {
-			return rs
+		if dataFloat64 >= ruleValueFloat64 {
+			return nil
 		}
-	} else {
-		return rs
 	}
 	return nil
 }
@@ -155,20 +229,18 @@ func (v validApi) Lt(data interface{}, ruleKey string, ruleValue string) error {
 		return rs
 	}
 	dataValue := reflect.ValueOf(data)
-	if dataValue.Kind() == reflect.Float64 && data.(float64) >= ruleValueFloat64 {
-		return rs
+	if dataValue.Kind() == reflect.Float64 && data.(float64) < ruleValueFloat64 {
+		return nil
 	} else if dataValue.Kind() == reflect.String {
 		dataFloat64, err := strconv.ParseFloat(data.(string), 64)
 		if err != nil {
 			return rs
 		}
-		if dataFloat64 >= ruleValueFloat64 {
-			return rs
+		if dataFloat64 < ruleValueFloat64 {
+			return nil
 		}
-	} else {
-		return rs
 	}
-	return nil
+	return rs
 }
 
 // 验证小于等于
@@ -181,20 +253,18 @@ func (v validApi) Lte(data interface{}, ruleKey string, ruleValue string) error 
 		return rs
 	}
 	dataValue := reflect.ValueOf(data)
-	if dataValue.Kind() == reflect.Float64 && data.(float64) > ruleValueFloat64 {
-		return rs
+	if dataValue.Kind() == reflect.Float64 && data.(float64) <= ruleValueFloat64 {
+		return nil
 	} else if dataValue.Kind() == reflect.String {
 		dataFloat64, err := strconv.ParseFloat(data.(string), 64)
 		if err != nil {
 			return rs
 		}
-		if dataFloat64 > ruleValueFloat64 {
-			return rs
+		if dataFloat64 <= ruleValueFloat64 {
+			return nil
 		}
-	} else {
-		return rs
 	}
-	return nil
+	return rs
 }
 
 // 验证日期

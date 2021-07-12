@@ -24,7 +24,7 @@ func (f Function) parseRules(rules map[string]interface{}) ([]map[string]interfa
 		ruleType := reflect.TypeOf(rule).Kind()
 		if ruleType == reflect.String {
 			if rule.(string) != "" {
-				for _, v := range strings.Split(rule.(string), ";") {
+				for _, v := range strings.Split(rule.(string), "|") {
 					list = append(list, v)
 				}
 			}

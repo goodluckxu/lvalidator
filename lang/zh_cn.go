@@ -6,7 +6,12 @@ type ZhCn struct {
 
 func (z *ZhCn) Init() {
 	z.Required = "{ruleKey}为必填项"
+	z.Array = "{ruleKey}必须是数组"
+	z.Map = "{ruleKey}必须是对象"
 	z.String = "{ruleKey}必须是字符串"
+	z.Len = "{ruleKey}长度必须是{ruleValue}"
+	z.Min = "{ruleKey}最小长度为{ruleValue}"
+	z.Max = "{ruleKey}最大长度为{ruleValue}"
 	z.Number = "{ruleKey}必须是数字"
 	z.Integer = "{ruleKey}必须是整数"
 	z.Gt = "{ruleKey}必须大于{ruleValue}"
