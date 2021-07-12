@@ -70,10 +70,7 @@ func (v *Valid) validRule(data interface{}, rule map[string]interface{}) error {
 		vType := reflect.TypeOf(val).Kind()
 		if vType == reflect.String {
 			vList := strings.Split(val.(string), ":")
-			vVal := ""
-			if len(vList) > 1 {
-				vVal = vList[1]
-			}
+			vVal := strings.Join(vList[1:], ":")
 			if notes != "" {
 				ruleKey = notes
 			}
