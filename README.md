@@ -106,31 +106,31 @@ max:5
 number
 ~~~
 
-### <a id="integer">integer规则</a>
+#### <a id="integer">integer规则</a>
 验证是否是整数
 ~~~
 integer
 ~~~
 
-### <a id="gt">gt规则</a>
+#### <a id="gt">gt规则</a>
 验证是否大于某个数
 ~~~
 gt:10
 ~~~
 
-### <a id="gte">gte规则</a>
+#### <a id="gte">gte规则</a>
 验证是否大于等于某个数
 ~~~
 gte:10
 ~~~
 
-### <a id="lt">lt规则</a>
+#### <a id="lt">lt规则</a>
 验证是否小于某个数
 ~~~
 lt:10
 ~~~
 
-### <a id="lte">lte规则</a>
+#### <a id="lte">lte规则</a>
 验证是否小于等于某个数
 ~~~
 lte:10
