@@ -36,7 +36,9 @@ notes:注释
 
 ## 自定义验证
 ~~~go
-func(value interface{}) error {
+// validData 需要验证的值
+// ruleKey 验证的key(非必填)
+func(validData interface{},ruleKey string) error {
     // 逻辑代码
     return nil
 }

@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type validApi struct {
@@ -21,268 +20,454 @@ type validApi struct {
 
 // 验证必填
 func (v validApi) Required(data interface{}, ruleKey string) error {
-	rs := errors.New(strings.ReplaceAll(Lang.Required, "{ruleKey}", ruleKey))
-	if data == nil {
-		return rs
-	}
-	dataValue := reflect.ValueOf(data)
-	if dataValue.Kind() == reflect.String && data.(string) == "" {
-		return rs
-	} else if dataValue.Kind() == reflect.Float64 && data.(float64) == 0 {
-		return rs
-	} else if dataValue.Kind() == reflect.Bool && data.(bool) == false {
-		return rs
-	} else if dataValue.Kind() == reflect.Slice && len(data.([]interface{})) == 0 {
-		return rs
-	}
-	return nil
+	return Func.ValidData(data, ruleKey, func(validData interface{}, rule string) error {
+		info := strings.ReplaceAll(Lang.Required, "{ruleKey}", rule)
+		rs := errors.New(info)
+		if validData == nil {
+			return rs
+		}
+		dataValue := reflect.ValueOf(validData)
+		if dataValue.Kind() == reflect.String && validData.(string) == "" {
+			return rs
+		} else if dataValue.Kind() == reflect.Float64 && validData.(float64) == 0 {
+			return rs
+		} else if dataValue.Kind() == reflect.Bool && validData.(bool) == false {
+			return rs
+		} else if dataValue.Kind() == reflect.Slice && len(validData.([]interface{})) == 0 {
+			return rs
+		}
+		return nil
+	})
 }
 
 // 验证数组
 func (v validApi) Array(data interface{}, ruleKey string) error {
-	rs := errors.New(strings.ReplaceAll(Lang.Array, "{ruleKey}", ruleKey))
-	if data == nil {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, rule string) error {
+		info := strings.ReplaceAll(Lang.Array, "{ruleKey}", rule)
+		rs := errors.New(info)
+		if validData == nil {
+			return nil
+		}
+		dataValue := reflect.ValueOf(validData)
+		if dataValue.Kind() == reflect.Slice {
+			return nil
+		}
 		return rs
-	}
-	dataValue := reflect.ValueOf(data)
-	if dataValue.Kind() == reflect.Slice {
-		return nil
-	}
-	return rs
+	})
 }
 
 // 验证对象
 func (v validApi) Map(data interface{}, ruleKey string) error {
-	rs := errors.New(strings.ReplaceAll(Lang.Map, "{ruleKey}", ruleKey))
-	if data == nil {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, rule string) error {
+		info := strings.ReplaceAll(Lang.Map, "{ruleKey}", rule)
+		rs := errors.New(info)
+		if validData == nil {
+			return nil
+		}
+		dataValue := reflect.ValueOf(validData)
+		if dataValue.Kind() == reflect.Map {
+			return nil
+		}
 		return rs
-	}
-	dataValue := reflect.ValueOf(data)
-	if dataValue.Kind() == reflect.Map {
-		return nil
-	}
-	return rs
+	})
 }
 
 // 验证字符串
 func (v validApi) String(data interface{}, ruleKey string) error {
-	rs := errors.New(strings.ReplaceAll(Lang.String, "{ruleKey}", ruleKey))
-	if data == nil {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, rule string) error {
+		info := strings.ReplaceAll(Lang.String, "{ruleKey}", rule)
+		rs := errors.New(info)
+		if validData == nil {
+			return nil
+		}
+		dataValue := reflect.ValueOf(validData)
+		if dataValue.Kind() == reflect.String {
+			return nil
+		}
 		return rs
-	}
-	dataValue := reflect.ValueOf(data)
-	if dataValue.Kind() == reflect.String {
-		return nil
-	}
-	return rs
+	})
 }
 
 // 验证长度相等
 func (v validApi) Len(data interface{}, ruleKey string, ruleValue string) error {
-	ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
-	info := strings.ReplaceAll(Lang.Len, "{ruleKey}", ruleKey)
-	info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
-	rs := errors.New(info)
-	if data == nil {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, rule string) error {
+		ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
+		info := strings.ReplaceAll(Lang.Len, "{ruleKey}", rule)
+		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
+		rs := errors.New(info)
+		if validData == nil {
+			return nil
+		}
+		dataValue := reflect.ValueOf(validData)
+		if dataValue.Kind() == reflect.String && len(validData.(string)) == int(ruleValueFloat64) {
+			return nil
+		} else if dataValue.Kind() == reflect.Slice && len(validData.([]interface{})) == int(ruleValueFloat64) {
+			return nil
+		}
 		return rs
-	}
-	dataValue := reflect.ValueOf(data)
-	if dataValue.Kind() == reflect.String && len(data.(string)) == int(ruleValueFloat64) {
-		return nil
-	} else if dataValue.Kind() == reflect.Slice && len(data.([]interface{})) == int(ruleValueFloat64) {
-		return nil
-	}
-	return rs
+	})
 }
 
 // 验证长度相等
 func (v validApi) Min(data interface{}, ruleKey string, ruleValue string) error {
-	ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
-	info := strings.ReplaceAll(Lang.Min, "{ruleKey}", ruleKey)
-	info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
-	rs := errors.New(info)
-	if data == nil {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, rule string) error {
+		ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
+		info := strings.ReplaceAll(Lang.Min, "{ruleKey}", rule)
+		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
+		rs := errors.New(info)
+		if validData == nil {
+			return nil
+		}
+		dataValue := reflect.ValueOf(validData)
+		if dataValue.Kind() == reflect.String && len(validData.(string)) >= int(ruleValueFloat64) {
+			return nil
+		} else if dataValue.Kind() == reflect.Slice && len(validData.([]interface{})) >= int(ruleValueFloat64) {
+			return nil
+		}
 		return rs
-	}
-	dataValue := reflect.ValueOf(data)
-	if dataValue.Kind() == reflect.String && len(data.(string)) >= int(ruleValueFloat64) {
-		return nil
-	} else if dataValue.Kind() == reflect.Slice && len(data.([]interface{})) >= int(ruleValueFloat64) {
-		return nil
-	}
-	return rs
+	})
 }
 
 // 验证长度相等
 func (v validApi) Max(data interface{}, ruleKey string, ruleValue string) error {
-	ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
-	info := strings.ReplaceAll(Lang.Max, "{ruleKey}", ruleKey)
-	info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
-	rs := errors.New(info)
-	if data == nil {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, rule string) error {
+		ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
+		info := strings.ReplaceAll(Lang.Max, "{ruleKey}", rule)
+		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
+		rs := errors.New(info)
+		if validData == nil {
+			return nil
+		}
+		dataValue := reflect.ValueOf(validData)
+		if dataValue.Kind() == reflect.String && len(validData.(string)) <= int(ruleValueFloat64) {
+			return nil
+		} else if dataValue.Kind() == reflect.Slice && len(validData.([]interface{})) <= int(ruleValueFloat64) {
+			return nil
+		}
 		return rs
-	}
-	dataValue := reflect.ValueOf(data)
-	if dataValue.Kind() == reflect.String && len(data.(string)) <= int(ruleValueFloat64) {
-		return nil
-	} else if dataValue.Kind() == reflect.Slice && len(data.([]interface{})) <= int(ruleValueFloat64) {
-		return nil
-	}
-	return rs
+	})
 }
 
 // 验证数字
 func (v validApi) Number(data interface{}, ruleKey string) error {
-	rs := errors.New(strings.ReplaceAll(Lang.Number, "{ruleKey}", ruleKey))
-	if data == nil {
-		return rs
-	}
-	dataValue := reflect.ValueOf(data)
-	if dataValue.Kind() == reflect.Float64 {
-		return nil
-	} else if dataValue.Kind() == reflect.String {
-		_, err := strconv.ParseFloat(data.(string), 64)
-		if err == nil {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, rule string) error {
+		info := strings.ReplaceAll(Lang.Number, "{ruleKey}", rule)
+		rs := errors.New(info)
+		if validData == nil {
 			return nil
 		}
-	}
-	return rs
+		dataValue := reflect.ValueOf(validData)
+		if dataValue.Kind() == reflect.Float64 {
+			return nil
+		} else if dataValue.Kind() == reflect.String {
+			_, err := strconv.ParseFloat(validData.(string), 64)
+			if err == nil {
+				return nil
+			}
+		}
+		return rs
+	})
 }
 
 // 验证整数
 func (v validApi) Integer(data interface{}, ruleKey string) error {
-	rs := errors.New(strings.ReplaceAll(Lang.Integer, "{ruleKey}", ruleKey))
-	if data == nil {
-		return rs
-	}
-	dataValue := reflect.ValueOf(data)
-	dataString := ""
-	if dataValue.Kind() == reflect.Float64 {
-		dataString = strconv.FormatFloat(data.(float64), 'f', -1, 64)
-	} else if dataValue.Kind() == reflect.String {
-		dataString = data.(string)
-	} else {
-		return rs
-	}
-	reg := regexp.MustCompile(`^\d*$`)
-	if !reg.MatchString(dataString) {
-		return rs
-	}
-	return nil
+	return Func.ValidData(data, ruleKey, func(validData interface{}, rule string) error {
+		info := strings.ReplaceAll(Lang.Integer, "{ruleKey}", rule)
+		rs := errors.New(info)
+		if validData == nil {
+			return nil
+		}
+		dataValue := reflect.ValueOf(validData)
+		dataString := ""
+		if dataValue.Kind() == reflect.Float64 {
+			dataString = strconv.FormatFloat(validData.(float64), 'f', -1, 64)
+		} else if dataValue.Kind() == reflect.String {
+			dataString = validData.(string)
+		} else {
+			return rs
+		}
+		reg := regexp.MustCompile(`^\d*$`)
+		if !reg.MatchString(dataString) {
+			return rs
+		}
+		return nil
+	})
 }
 
 // 验证大于
 func (v validApi) Gt(data interface{}, ruleKey string, ruleValue string) error {
-	ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
-	info := strings.ReplaceAll(Lang.Gt, "{ruleKey}", ruleKey)
-	info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
-	rs := errors.New(info)
-	if data == nil {
-		return rs
-	}
-	dataValue := reflect.ValueOf(data)
-	if dataValue.Kind() == reflect.Float64 && data.(float64) > ruleValueFloat64 {
-		return nil
-	} else if dataValue.Kind() == reflect.String {
-		dataFloat64, err := strconv.ParseFloat(data.(string), 64)
-		if err != nil {
-			return rs
-		}
-		if dataFloat64 > ruleValueFloat64 {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, rule string) error {
+		ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
+		info := strings.ReplaceAll(Lang.Gt, "{ruleKey}", rule)
+		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
+		rs := errors.New(info)
+		if validData == nil {
 			return nil
 		}
-	}
-	return rs
+		dataValue := reflect.ValueOf(validData)
+		if dataValue.Kind() == reflect.Float64 && validData.(float64) > ruleValueFloat64 {
+			return nil
+		} else if dataValue.Kind() == reflect.String {
+			dataFloat64, err := strconv.ParseFloat(validData.(string), 64)
+			if err != nil {
+				return rs
+			}
+			if dataFloat64 > ruleValueFloat64 {
+				return nil
+			}
+		}
+		return rs
+	})
 }
 
 // 验证大于等于
 func (v validApi) Gte(data interface{}, ruleKey string, ruleValue string) error {
-	ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
-	info := strings.ReplaceAll(Lang.Gte, "{ruleKey}", ruleKey)
-	info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
-	rs := errors.New(info)
-	if data == nil {
-		return rs
-	}
-	dataValue := reflect.ValueOf(data)
-	if dataValue.Kind() == reflect.Float64 && data.(float64) >= ruleValueFloat64 {
-		return nil
-	} else if dataValue.Kind() == reflect.String {
-		dataFloat64, err := strconv.ParseFloat(data.(string), 64)
-		if err != nil {
-			return rs
-		}
-		if dataFloat64 >= ruleValueFloat64 {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, rule string) error {
+		ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
+		info := strings.ReplaceAll(Lang.Gte, "{ruleKey}", rule)
+		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
+		rs := errors.New(info)
+		if validData == nil {
 			return nil
 		}
-	}
-	return nil
+		dataValue := reflect.ValueOf(validData)
+		if dataValue.Kind() == reflect.Float64 && validData.(float64) >= ruleValueFloat64 {
+			return nil
+		} else if dataValue.Kind() == reflect.String {
+			dataFloat64, err := strconv.ParseFloat(validData.(string), 64)
+			if err != nil {
+				return rs
+			}
+			if dataFloat64 >= ruleValueFloat64 {
+				return nil
+			}
+		}
+		return rs
+	})
 }
 
 // 验证小于
 func (v validApi) Lt(data interface{}, ruleKey string, ruleValue string) error {
-	ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
-	info := strings.ReplaceAll(Lang.Lt, "{ruleKey}", ruleKey)
-	info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
-	rs := errors.New(info)
-	if data == nil {
-		return rs
-	}
-	dataValue := reflect.ValueOf(data)
-	if dataValue.Kind() == reflect.Float64 && data.(float64) < ruleValueFloat64 {
-		return nil
-	} else if dataValue.Kind() == reflect.String {
-		dataFloat64, err := strconv.ParseFloat(data.(string), 64)
-		if err != nil {
-			return rs
-		}
-		if dataFloat64 < ruleValueFloat64 {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, rule string) error {
+		ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
+		info := strings.ReplaceAll(Lang.Lt, "{ruleKey}", rule)
+		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
+		rs := errors.New(info)
+		if validData == nil {
 			return nil
 		}
-	}
-	return rs
+		dataValue := reflect.ValueOf(validData)
+		if dataValue.Kind() == reflect.Float64 && validData.(float64) < ruleValueFloat64 {
+			return nil
+		} else if dataValue.Kind() == reflect.String {
+			dataFloat64, err := strconv.ParseFloat(validData.(string), 64)
+			if err != nil {
+				return rs
+			}
+			if dataFloat64 < ruleValueFloat64 {
+				return nil
+			}
+		}
+		return rs
+	})
 }
 
 // 验证小于等于
 func (v validApi) Lte(data interface{}, ruleKey string, ruleValue string) error {
-	ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
-	info := strings.ReplaceAll(Lang.Lte, "{ruleKey}", ruleKey)
-	info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
-	rs := errors.New(info)
-	if data == nil {
-		return rs
-	}
-	dataValue := reflect.ValueOf(data)
-	if dataValue.Kind() == reflect.Float64 && data.(float64) <= ruleValueFloat64 {
-		return nil
-	} else if dataValue.Kind() == reflect.String {
-		dataFloat64, err := strconv.ParseFloat(data.(string), 64)
-		if err != nil {
-			return rs
-		}
-		if dataFloat64 <= ruleValueFloat64 {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, rule string) error {
+		ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
+		info := strings.ReplaceAll(Lang.Lte, "{ruleKey}", rule)
+		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
+		rs := errors.New(info)
+		if validData == nil {
 			return nil
 		}
-	}
-	return rs
+		dataValue := reflect.ValueOf(validData)
+		if dataValue.Kind() == reflect.Float64 && validData.(float64) <= ruleValueFloat64 {
+			return nil
+		} else if dataValue.Kind() == reflect.String {
+			dataFloat64, err := strconv.ParseFloat(validData.(string), 64)
+			if err != nil {
+				return rs
+			}
+			if dataFloat64 <= ruleValueFloat64 {
+				return nil
+			}
+		}
+		return rs
+	})
 }
 
 // 验证日期
 func (v validApi) Date(data interface{}, ruleKey string) error {
-	info := strings.ReplaceAll(Lang.Date, "{ruleKey}", ruleKey)
-	rs := errors.New(info)
-	dataValue := reflect.ValueOf(data)
-	if dataValue.Kind() != reflect.String {
-		return rs
-	}
-	if len(data.(string)) > 19 {
-		return rs
-	}
-	formatAtByte := []byte("0000-00-00 00:00:00")
-	copy(formatAtByte, []byte(data.(string)))
-	_, err := time.ParseInLocation("2006-01-02 15:04:05", string(formatAtByte), time.Local)
-	if err != nil {
-		return rs
-	}
-	return nil
+	return Func.ValidData(data, ruleKey, func(validData interface{}, rule string) error {
+		info := strings.ReplaceAll(Lang.Date, "{ruleKey}", rule)
+		rs := errors.New(info)
+		if validData == nil {
+			return nil
+		}
+		dataValue := reflect.ValueOf(validData)
+		if dataValue.Kind() != reflect.String {
+			return rs
+		}
+		if len(validData.(string)) > 19 {
+			return rs
+		}
+		_, err := Func.TimeParse(validData.(string))
+		if err != nil {
+			return rs
+		}
+		return nil
+	})
 }
+
+//
+//// 日期大于
+//func (v validApi) DateGt(validData interface{}, ruleKey string, ruleValue string, data interface{}) error {
+//	ruleValueTime, err := Func.TimeParse(ruleValue)
+//	notes := ruleValue
+//	var errGtValue error
+//	if err != nil {
+//		notes = RuleNotes[ruleValue]
+//		gtValue := handle_interface.GetInterface(data, ruleValue)
+//		ruleValueTime, errGtValue = Func.TimeParse(gtValue.(string))
+//	}
+//	info := strings.ReplaceAll(Lang.DateGt, "{ruleKey}", ruleKey)
+//	info = strings.ReplaceAll(info, "{ruleValue}", notes)
+//	rs := errors.New(info)
+//	if errGtValue != nil {
+//		return rs
+//	}
+//	validDataTime, err := Func.TimeParse(validData.(string))
+//	if err != nil {
+//		return rs
+//	}
+//	if validDataTime.Unix() > ruleValueTime.Unix() {
+//		return nil
+//	}
+//	return rs
+//}
+//
+//// 日期大于等于
+//func (v validApi) DateGte(validData interface{}, ruleKey string, ruleValue string, data interface{}) error {
+//	ruleValueTime, err := Func.TimeParse(ruleValue)
+//	notes := ruleValue
+//	var errGtValue error
+//	if err != nil {
+//		notes = RuleNotes[ruleValue]
+//		gtValue := handle_interface.GetInterface(data, ruleValue)
+//		ruleValueTime, errGtValue = Func.TimeParse(gtValue.(string))
+//	}
+//	info := strings.ReplaceAll(Lang.DateGte, "{ruleKey}", ruleKey)
+//	info = strings.ReplaceAll(info, "{ruleValue}", notes)
+//	rs := errors.New(info)
+//	if errGtValue != nil {
+//		return rs
+//	}
+//	validDataTime, err := Func.TimeParse(validData.(string))
+//	if err != nil {
+//		return rs
+//	}
+//	if validDataTime.Unix() >= ruleValueTime.Unix() {
+//		return nil
+//	}
+//	return rs
+//}
+//
+//// 日期小于
+//func (v validApi) DateLt(validData interface{}, ruleKey string, ruleValue string, data interface{}) error {
+//	ruleValueTime, err := Func.TimeParse(ruleValue)
+//	notes := ruleValue
+//	var errGtValue error
+//	if err != nil {
+//		notes = RuleNotes[ruleValue]
+//		gtValue := handle_interface.GetInterface(data, ruleValue)
+//		ruleValueTime, errGtValue = Func.TimeParse(gtValue.(string))
+//	}
+//	info := strings.ReplaceAll(Lang.DateLt, "{ruleKey}", ruleKey)
+//	info = strings.ReplaceAll(info, "{ruleValue}", notes)
+//	rs := errors.New(info)
+//	if errGtValue != nil {
+//		return rs
+//	}
+//	validDataTime, err := Func.TimeParse(validData.(string))
+//	if err != nil {
+//		return rs
+//	}
+//	if validDataTime.Unix() < ruleValueTime.Unix() {
+//		return nil
+//	}
+//	return rs
+//}
+//
+//// 日期小于等于
+//func (v validApi) DateLte(validData interface{}, ruleKey string, ruleValue string, data interface{}) error {
+//	ruleValueTime, err := Func.TimeParse(ruleValue)
+//	notes := ruleValue
+//	var errGtValue error
+//	if err != nil {
+//		notes = RuleNotes[ruleValue]
+//		gtValue := handle_interface.GetInterface(data, ruleValue)
+//		ruleValueTime, errGtValue = Func.TimeParse(gtValue.(string))
+//	}
+//	info := strings.ReplaceAll(Lang.DateLte, "{ruleKey}", ruleKey)
+//	info = strings.ReplaceAll(info, "{ruleValue}", notes)
+//	rs := errors.New(info)
+//	if errGtValue != nil {
+//		return rs
+//	}
+//	validDataTime, err := Func.TimeParse(validData.(string))
+//	if err != nil {
+//		return rs
+//	}
+//	if validDataTime.Unix() <= ruleValueTime.Unix() {
+//		return nil
+//	}
+//	return rs
+//}
+//
+//// 等于字段
+//func (v validApi) EqField(validData interface{}, ruleKey string, ruleValue string, data interface{}) error {
+//	info := strings.ReplaceAll(Lang.EqField, "{ruleKey}", ruleKey)
+//	notes := RuleNotes[ruleValue]
+//	info = strings.ReplaceAll(info, "{ruleValue}", notes)
+//	rs := errors.New(info)
+//	if validData == nil {
+//		return rs
+//	}
+//	ruleValueData := handle_interface.GetInterface(data, ruleValue)
+//	if validData == ruleValueData {
+//		return nil
+//	}
+//	return rs
+//}
+//
+//// 验证邮箱
+//func (v validApi) Email(validData interface{}, ruleKey string) error {
+//	info := strings.ReplaceAll(Lang.Email, "{ruleKey}", ruleKey)
+//	rs := errors.New(info)
+//	dataValue := reflect.ValueOf(validData)
+//	if dataValue.Kind() != reflect.String {
+//		return rs
+//	}
+//	reg := regexp.MustCompile(`^[A-Za-z0-9\\u4e00-\\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$`)
+//	if reg.MatchString(validData.(string)) {
+//		return nil
+//	}
+//	return rs
+//}
+//
+//// 验证手机
+//func (v validApi) Phone(validData interface{}, ruleKey string) error {
+//	info := strings.ReplaceAll(Lang.Phone, "{ruleKey}", ruleKey)
+//	rs := errors.New(info)
+//	dataValue := reflect.ValueOf(validData)
+//	if dataValue.Kind() != reflect.String {
+//		return rs
+//	}
+//	reg := regexp.MustCompile(`^1[0-9]{10}$`)
+//	if reg.MatchString(validData.(string)) {
+//		return nil
+//	}
+//	return rs
+//}

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"errors"
-	"go-lib/handle_interface"
+	"fmt"
 	"net/http"
 	"reflect"
 	"strings"
@@ -64,25 +64,47 @@ func (v *Valid) ValidXml(rules map[string]interface{}, data interface{}) error {
 func (v *Valid) validRule(data interface{}, rule map[string]interface{}) error {
 	ruleKey := rule["key"].(string)
 	notes := rule["notes"].(string)
-	validData := handle_interface.GetInterface(data, ruleKey)
 	ruleList := rule["list"].([]interface{})
 	for _, val := range ruleList {
-		vType := reflect.TypeOf(val).Kind()
+		vValue := reflect.ValueOf(val)
+		vType := vValue.Kind()
 		if vType == reflect.String {
 			vList := strings.Split(val.(string), ":")
 			vVal := strings.Join(vList[1:], ":")
 			if notes != "" {
 				ruleKey = notes
 			}
-			if err := v.validStringRule(validData, ruleKey, vList[0], vVal); err != nil {
+			if err := v.validStringRule(data, ruleKey, vList[0], vVal); err != nil {
 				return err
 			}
 		} else if vType == reflect.Func {
-			if err := val.(func(value interface{}) error)(validData); err != nil {
+			err := Func.ValidData(data, ruleKey, func(validData interface{}, rule string) error {
+				if notes != "" {
+					rule = notes
+				}
+				rValues := []reflect.Value{}
+				if validData == nil {
+					nilArg := reflect.Zero(reflect.TypeOf((*error)(nil)).Elem())
+					rValues = append(rValues, nilArg)
+				} else {
+					rValues = append(rValues, reflect.ValueOf(validData))
+				}
+				if vValue.Type().NumIn() >= 2 {
+					rValues = append(rValues, reflect.ValueOf(rule))
+				}
+				rs := vValue.Call(rValues)
+				errInterface := rs[0].Interface()
+				if errInterface == nil {
+					return nil
+				}
+				if err := errInterface.(error); err != nil {
+					return err
+				}
+				return nil
+			})
+			if err != nil {
 				return err
 			}
-		} else {
-			return errors.New("不存在的规则：键为" + ruleKey)
 		}
 	}
 	return nil
@@ -100,7 +122,7 @@ func (v *Valid) validStringRule(data interface{}, ruleKey string, rule string, r
 			rValues = append(rValues, reflect.ValueOf(data))
 		}
 		rValues = append(rValues, reflect.ValueOf(ruleKey))
-		if fn.Type().NumIn() == 3 {
+		if fn.Type().NumIn() >= 3 {
 			rValues = append(rValues, reflect.ValueOf(ruleValue))
 		}
 		rs := fn.Call(rValues)
@@ -112,7 +134,7 @@ func (v *Valid) validStringRule(data interface{}, ruleKey string, rule string, r
 			return err
 		}
 	}
-	return nil
+	return errors.New(fmt.Sprintf("不存在的规则: %s", rule))
 }
 
 // 获取所有的验证方法

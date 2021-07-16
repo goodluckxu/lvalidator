@@ -2,12 +2,14 @@ package lvalidator
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var Func Function
@@ -21,6 +23,9 @@ func (f Function) parseRules(rules map[string]interface{}) ([]map[string]interfa
 	for key, rule := range rules {
 		ruleMap := map[string]interface{}{}
 		list := []interface{}{}
+		if rule == nil {
+			return nil, errors.New("规格类型不正确")
+		}
 		ruleType := reflect.TypeOf(rule).Kind()
 		if ruleType == reflect.String {
 			if rule.(string) != "" {
@@ -39,6 +44,9 @@ func (f Function) parseRules(rules map[string]interface{}) ([]map[string]interfa
 		notes := ""
 		newList := []interface{}{}
 		for _, v := range list {
+			if v == nil {
+				return nil, errors.New("规格类型不正确")
+			}
 			vType := reflect.TypeOf(v).Kind()
 			if vType == reflect.String {
 				vList := strings.Split(v.(string), ":")
@@ -57,10 +65,16 @@ func (f Function) parseRules(rules map[string]interface{}) ([]map[string]interfa
 				}
 			} else if vType == reflect.Func {
 				newList = append(newList, v)
+			} else {
+				return nil, errors.New("规格类型不正确")
 			}
 		}
 		if len(newList) == 0 {
 			continue
+		}
+		RuleNotes[key] = notes
+		if notes == "" {
+			RuleNotes[key] = key
 		}
 		ruleMap["key"] = key
 		ruleMap["sort"] = sort
@@ -162,7 +176,7 @@ func (f Function) formatNumber(i interface{}) string {
 }
 
 // 将驼峰转成下划线
-func (f Function)humpToUnderline(value string) string {
+func (f Function) humpToUnderline(value string) string {
 	lenValue := len(value)
 	newValue := ""
 	for i := 0; i < lenValue; i++ {
@@ -179,4 +193,109 @@ func (f Function)humpToUnderline(value string) string {
 		newValue += newBy
 	}
 	return newValue
+}
+
+// TimeParse 字符串转时间
+func (f Function) TimeParse(date string) (time.Time, error) {
+	formatAtByte := []byte("0000-00-00 00:00:00")
+	copy(formatAtByte, []byte(date))
+	return time.ParseInLocation("2006-01-02 15:04:05", string(formatAtByte), time.Local)
+}
+
+// InArray 判断某一个值是否含在切片之中
+func (f Function) InArray(val interface{}, array interface{}) (exists bool, index int) {
+	exists = false
+	index = -1
+
+	switch reflect.TypeOf(array).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(array)
+
+		for i := 0; i < s.Len(); i++ {
+			if reflect.DeepEqual(val, s.Index(i).Interface()) == true {
+				index = i
+				exists = true
+				return
+			}
+		}
+	}
+	return
+}
+
+func (f Function) ValidData(
+	data interface{},
+	ruleKey string,
+	fn func(validData interface{}, rule string) error,
+) error {
+	dataByte, _ := json.Marshal(data)
+	var newData interface{}
+	_ = json.Unmarshal(dataByte, &newData)
+	return f.handleValidData(newData, ruleKey, ruleKey, fn)
+}
+
+func (f Function) handleValidData(
+	data interface{},
+	inputRule string,
+	ruleKey string,
+	fn func(validData interface{}, rule string) error,
+) error {
+	if data == nil {
+		return fn(nil, ruleKey)
+	}
+	inputRuleList := strings.Split(inputRule, ".")
+	dataType := reflect.ValueOf(data).Kind()
+	nowRule := inputRuleList[0]
+	if len(inputRuleList) > 1 {
+		otherRule := strings.Join(inputRuleList[1:], ".")
+		if dataType == reflect.Slice || dataType == reflect.Array {
+			dataList := data.([]interface{})
+			index, err := f.ParseInt(nowRule)
+			if err == nil {
+				if index > len(dataList)-1 {
+					return fn(nil, ruleKey)
+				}
+				if err := f.handleValidData(dataList[index], otherRule, ruleKey, fn); err != nil {
+					return err
+				}
+			} else {
+				for key, val := range dataList {
+					indexStr := f.formatNumber(key)
+					dLen := len(ruleKey) - len(inputRule)
+					newRuleKey := ruleKey[0:dLen] + indexStr + "." + otherRule
+					if err := f.handleValidData(val, otherRule, newRuleKey, fn); err != nil {
+						return err
+					}
+				}
+			}
+		} else if dataType == reflect.Map {
+			dataMap := data.(map[string]interface{})
+			if err := f.handleValidData(dataMap[nowRule], otherRule, ruleKey, fn); err != nil {
+				return err
+			}
+		}
+	} else {
+		if dataType == reflect.Slice || dataType == reflect.Array {
+			dataList := data.([]interface{})
+			index, err := f.ParseInt(nowRule)
+			if err == nil {
+				if index > len(dataList)-1 {
+					return fn(nil, ruleKey)
+				}
+				if err := fn(dataList[index], ruleKey); err != nil {
+					return err
+				}
+			}
+		} else if dataType == reflect.Map {
+			dataMap := data.(map[string]interface{})
+			if err := fn(dataMap[nowRule], ruleKey); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (f Function) ParseInt(value string) (int, error) {
+	valueInt64, err := strconv.ParseInt(value, 10, 64)
+	return int(valueInt64), err
 }
