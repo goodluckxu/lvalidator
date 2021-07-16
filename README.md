@@ -58,7 +58,13 @@ func(validData interface{},ruleKey string) error {
 [gte](#gte) |
 [lt](#lt) |
 [lte](#lte) |
-[date](#date)
+[date](#date) |
+[date_gt](#date_gt) |
+[date_gte](#date_gte) |
+[date_lt](#date_lt) |
+[date_lte](#date_lte) |
+[email](#email) |
+[phone](#phone) |
 
 #### <a id="required">required规则</a>
 验证是否必填。null，字符串为""，数字类型为0，bool类型为false，数组为[]都不通过
@@ -142,4 +148,40 @@ lte:10
 验证是否是日期格式 Y-m-d H:i:s类型
 ~~~
 date
+~~~
+
+#### <a id="date_gt">date_gt规则</a>
+验证日期是否大于某个值
+~~~
+date_gt:2002-02-05
+~~~
+
+#### <a id="date_gte">date_gte规则</a>
+验证日期是否大于等于某个值
+~~~
+date_gte:2002-02-05
+~~~
+
+#### <a id="date_lt">date_lt规则</a>
+验证日期是否小于某个值
+~~~
+date_lt:2002-02-05
+~~~
+
+#### <a id="date_lte">date_lte规则</a>
+验证日期是否小于等于某个值
+~~~
+date_lte:2002-02-05
+~~~
+
+#### <a id="email">email规则</a>
+验证是否是邮箱
+~~~
+email
+~~~
+
+#### <a id="phone">phone规则</a>
+验证是否是手机号
+~~~
+phone
 ~~~

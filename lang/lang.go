@@ -1,6 +1,7 @@
 package lang
 
 type Lang struct {
+	Error    string // 验证错误
 	Required string // 必填
 	Array    string // 数组
 	Map      string // 对象
@@ -15,4 +16,11 @@ type Lang struct {
 	Lt       string // 小于
 	Lte      string // 小于等于
 	Date     string // 日期 Y-m-d H:i:s
+	DateGt   string // 日期大于值
+	DateGte  string // 日期大于等于值
+	DateLt   string // 日期小于值
+	DateLte  string // 日期小于等于值
+	EqField  string // 等于字段
+	Email    string // 邮箱
+	Phone    string // 手机
 }

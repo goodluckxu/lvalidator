@@ -63,7 +63,6 @@ func (v *Valid) ValidXml(rules map[string]interface{}, data interface{}) error {
 // 验证规则
 func (v *Valid) validRule(data interface{}, rule map[string]interface{}) error {
 	ruleKey := rule["key"].(string)
-	notes := rule["notes"].(string)
 	ruleList := rule["list"].([]interface{})
 	for _, val := range ruleList {
 		vValue := reflect.ValueOf(val)
@@ -71,17 +70,12 @@ func (v *Valid) validRule(data interface{}, rule map[string]interface{}) error {
 		if vType == reflect.String {
 			vList := strings.Split(val.(string), ":")
 			vVal := strings.Join(vList[1:], ":")
-			if notes != "" {
-				ruleKey = notes
-			}
 			if err := v.validStringRule(data, ruleKey, vList[0], vVal); err != nil {
 				return err
 			}
 		} else if vType == reflect.Func {
 			err := Func.ValidData(data, ruleKey, func(validData interface{}, rule string) error {
-				if notes != "" {
-					rule = notes
-				}
+				notes := Func.GetNotes(ruleKey, rule)
 				rValues := []reflect.Value{}
 				if validData == nil {
 					nilArg := reflect.Zero(reflect.TypeOf((*error)(nil)).Elem())
@@ -90,7 +84,7 @@ func (v *Valid) validRule(data interface{}, rule map[string]interface{}) error {
 					rValues = append(rValues, reflect.ValueOf(validData))
 				}
 				if vValue.Type().NumIn() >= 2 {
-					rValues = append(rValues, reflect.ValueOf(rule))
+					rValues = append(rValues, reflect.ValueOf(notes))
 				}
 				rs := vValue.Call(rValues)
 				errInterface := rs[0].Interface()

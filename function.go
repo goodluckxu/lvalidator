@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -69,16 +70,9 @@ func (f Function) parseRules(rules map[string]interface{}) ([]map[string]interfa
 				return nil, errors.New("规格类型不正确")
 			}
 		}
-		if len(newList) == 0 {
-			continue
-		}
 		RuleNotes[key] = notes
-		if notes == "" {
-			RuleNotes[key] = key
-		}
 		ruleMap["key"] = key
 		ruleMap["sort"] = sort
-		ruleMap["notes"] = notes
 		ruleMap["list"] = newList
 		ruleList = append(ruleList, ruleMap)
 	}
@@ -222,6 +216,7 @@ func (f Function) InArray(val interface{}, array interface{}) (exists bool, inde
 	return
 }
 
+// 验证数据
 func (f Function) ValidData(
 	data interface{},
 	ruleKey string,
@@ -233,6 +228,7 @@ func (f Function) ValidData(
 	return f.handleValidData(newData, ruleKey, ruleKey, fn)
 }
 
+// 处理验证数据
 func (f Function) handleValidData(
 	data interface{},
 	inputRule string,
@@ -295,7 +291,74 @@ func (f Function) handleValidData(
 	return nil
 }
 
+// 解析int类型
 func (f Function) ParseInt(value string) (int, error) {
 	valueInt64, err := strconv.ParseInt(value, 10, 64)
 	return int(valueInt64), err
+}
+
+// 获取两个字段最小的*数量
+func (f Function) GetTwoFieldStarInfo(ruleOne, ruleTwo string) map[string]interface{} {
+	ruleOneList := strings.Split(ruleOne, ".")
+	ruleTwoList := strings.Split(ruleTwo, ".")
+	starOneLen := 0
+	starOneIndexList := []int{}
+	for i := 0; i < len(ruleOneList); i++ {
+		if ruleOneList[i] == "*" {
+			starOneLen++
+			starOneIndexList = append(starOneIndexList, i)
+		}
+	}
+	startTwoLen := 0
+	starTwoIndexList := []int{}
+	for i := 0; i < len(ruleTwoList); i++ {
+		if ruleTwoList[i] == "*" {
+			startTwoLen++
+			starTwoIndexList = append(starTwoIndexList, i)
+		}
+	}
+	starLen := starOneLen
+	if startTwoLen < starLen {
+		starLen = startTwoLen
+	}
+	return map[string]interface{}{
+		"one": starOneIndexList[0:starLen],
+		"two": starTwoIndexList[0:starLen],
+	}
+}
+
+// 判断两个字段是否可比较
+func (f Function) IsTwoFieldCompare(ruleOne, ruleTwo string, starInfo map[string]interface{}) bool {
+	starOneIndexList := starInfo["one"].([]int)
+	starTwoIndexList := starInfo["two"].([]int)
+	ruleOneList := strings.Split(ruleOne, ".")
+	ruleTwoList := strings.Split(ruleTwo, ".")
+	oneCompare := []string{}
+	for i := 0; i < len(ruleOneList); i++ {
+		if bl, _ := f.InArray(i, starOneIndexList); bl {
+			oneCompare = append(oneCompare, ruleOneList[i])
+		}
+	}
+	twoCompare := []string{}
+	for i := 0; i < len(ruleTwoList); i++ {
+		if bl, _ := f.InArray(i, starTwoIndexList); bl {
+			twoCompare = append(twoCompare, ruleTwoList[i])
+		}
+	}
+	return reflect.DeepEqual(oneCompare, twoCompare)
+}
+
+// 是否是integer类型
+func (f Function) IsInteger(value string) bool {
+	reg := regexp.MustCompile(`^\d*$`)
+	return reg.MatchString(value)
+}
+
+// 获取注释
+func (f Function) GetNotes(ruleKey, rule string) string {
+	notes := RuleNotes[ruleKey]
+	if notes == "" {
+		notes = rule
+	}
+	return notes
 }
