@@ -74,8 +74,7 @@ func (v *Valid) validRule(data interface{}, rule map[string]interface{}) error {
 				return err
 			}
 		} else if vType == reflect.Func {
-			err := Func.ValidData(data, ruleKey, func(validData interface{}, rule string) error {
-				notes := Func.GetNotes(ruleKey, rule)
+			err := Func.ValidData(data, ruleKey, func(validData interface{}, validNodes string) error {
 				rValues := []reflect.Value{}
 				if validData == nil {
 					nilArg := reflect.Zero(reflect.TypeOf((*error)(nil)).Elem())
@@ -84,7 +83,7 @@ func (v *Valid) validRule(data interface{}, rule map[string]interface{}) error {
 					rValues = append(rValues, reflect.ValueOf(validData))
 				}
 				if vValue.Type().NumIn() >= 2 {
-					rValues = append(rValues, reflect.ValueOf(notes))
+					rValues = append(rValues, reflect.ValueOf(validNodes))
 				}
 				rs := vValue.Call(rValues)
 				errInterface := rs[0].Interface()

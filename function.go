@@ -220,12 +220,37 @@ func (f Function) InArray(val interface{}, array interface{}) (exists bool, inde
 func (f Function) ValidData(
 	data interface{},
 	ruleKey string,
-	fn func(validData interface{}, rule string) error,
+	fn func(validData interface{}, validNotes string) error,
 ) error {
 	dataByte, _ := json.Marshal(data)
 	var newData interface{}
 	_ = json.Unmarshal(dataByte, &newData)
-	return f.handleValidData(newData, ruleKey, ruleKey, fn)
+	return f.handleValidData(newData, ruleKey, ruleKey, func(validData interface{}, rule string) error {
+		return fn(validData, f.GetNotes(ruleKey, rule))
+	})
+}
+
+// 验证两个字段数据
+func (f Function) ValidDoubleData(
+	data interface{},
+	ruleKey string,
+	compareKey string,
+	fn func(validData, compareData interface{}, validNotes, compareNotes string) error,
+) error {
+	dataByte, _ := json.Marshal(data)
+	var newData interface{}
+	_ = json.Unmarshal(dataByte, &newData)
+	starInfo := f.GetTwoFieldStarInfo(ruleKey, compareKey)
+	return f.handleValidData(newData, ruleKey, ruleKey, func(validData interface{}, rule string) error {
+		return f.handleValidData(newData, compareKey, compareKey, func(compareData interface{}, compareRule string) error {
+			if !f.IsTwoFieldCompare(rule, compareRule, starInfo) {
+				return nil
+			}
+			validNotes := f.GetNotes(ruleKey, rule)
+			compareNotes := f.GetNotes(compareKey, compareRule)
+			return fn(validData, compareData, validNotes, compareNotes)
+		})
+	})
 }
 
 // 处理验证数据
