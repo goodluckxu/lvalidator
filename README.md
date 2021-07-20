@@ -37,8 +37,8 @@ notes:注释
 ## 自定义验证
 ~~~go
 // validData 需要验证的值
-// notes 字段注释(非必填)
-func(validData interface{},notes string) error {
+// validNotes 字段注释(非必填)
+func(validData interface{},validNotes string) error {
     // 逻辑代码
     return nil
 }
