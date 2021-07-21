@@ -1,10 +1,14 @@
 package lvalidator
 
-import "lvalidator/lang"
+import (
+	"lvalidator/lang"
+	"reflect"
+)
 
 var (
-	Lang      lang.ZhCn
-	RuleNotes map[string]string
+	Lang        lang.ZhCn
+	RuleNotes   map[string]string
+	ValidApiMap map[string]reflect.Value
 )
 
 func init() {

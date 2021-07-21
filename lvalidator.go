@@ -13,7 +13,6 @@ import (
 type Valid struct {
 	request     *http.Request
 	validApi    validApi
-	validApiMap interface{}
 }
 
 func New(r *http.Request) *Valid {
@@ -124,7 +123,7 @@ func (v *Valid) validStringRule(data interface{}, ruleKey string, rule string, r
 
 // 获取所有的验证方法
 func (v *Valid) getValidApiFunc(rule string) reflect.Value {
-	if v.validApiMap == nil {
+	if !ValidApiMap[rule].IsValid() {
 		validApiValue := reflect.ValueOf(validApi{})
 		numMethod := validApiValue.NumMethod()
 		apiMap := map[string]reflect.Value{}
@@ -132,7 +131,7 @@ func (v *Valid) getValidApiFunc(rule string) reflect.Value {
 			methodName := validApiValue.Type().Method(i).Name
 			apiMap[Func.humpToUnderline(methodName)] = validApiValue.Method(i)
 		}
-		v.validApiMap = apiMap
+		ValidApiMap = apiMap
 	}
-	return v.validApiMap.(map[string]reflect.Value)[rule]
+	return ValidApiMap[rule]
 }
