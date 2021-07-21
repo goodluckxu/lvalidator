@@ -27,18 +27,18 @@ func (f Function) parseRules(rules map[string]interface{}) ([]map[string]interfa
 		if rule == nil {
 			return nil, errors.New("规格类型不正确")
 		}
-		ruleType := reflect.TypeOf(rule).Kind()
-		if ruleType == reflect.String {
+		switch rule.(type) {
+		case string:
 			if rule.(string) != "" {
 				for _, v := range strings.Split(rule.(string), "|") {
 					list = append(list, v)
 				}
 			}
-		} else if ruleType == reflect.Slice {
+		case []interface{}:
 			for _, v := range rule.([]interface{}) {
 				list = append(list, v)
 			}
-		} else {
+		default:
 			return nil, errors.New("规格类型不正确")
 		}
 		sort := ""
@@ -48,8 +48,8 @@ func (f Function) parseRules(rules map[string]interface{}) ([]map[string]interfa
 			if v == nil {
 				return nil, errors.New("规格类型不正确")
 			}
-			vType := reflect.TypeOf(v).Kind()
-			if vType == reflect.String {
+			switch v.(type) {
+			case string:
 				vList := strings.Split(v.(string), ":")
 				if vList[0] != "sort" && vList[0] != "notes" {
 					newList = append(newList, v)
@@ -64,9 +64,9 @@ func (f Function) parseRules(rules map[string]interface{}) ([]map[string]interfa
 				case "notes":
 					notes = vList[1]
 				}
-			} else if vType == reflect.Func {
+			case func(interface{}) error, func(interface{}, string) error:
 				newList = append(newList, v)
-			} else {
+			default:
 				return nil, errors.New("规格类型不正确")
 			}
 		}
@@ -136,32 +136,32 @@ func (f Function) formatNumber(i interface{}) string {
 		return ""
 	}
 	var int64I int64
-	switch reflect.TypeOf(i).Kind().String() {
-	case "int":
+	switch i.(type) {
+	case int:
 		int64I = int64(i.(int))
-	case "int8":
+	case int8:
 		int64I = int64(i.(int8))
-	case "int16":
+	case int16:
 		int64I = int64(i.(int16))
-	case "int32":
+	case int32:
 		int64I = int64(i.(int32))
-	case "int64":
+	case int64:
 		int64I = i.(int64)
-	case "uint":
+	case uint:
 		int64I = int64(i.(uint))
-	case "uint8":
+	case uint8:
 		int64I = int64(i.(uint8))
-	case "uint16":
+	case uint16:
 		int64I = int64(i.(uint16))
-	case "uint32":
+	case uint32:
 		int64I = int64(i.(uint32))
-	case "uint64":
+	case uint64:
 		int64I = int64(i.(uint64))
-	case "float32":
+	case float32:
 		int64I = int64(i.(float32))
-	case "float64":
+	case float64:
 		int64I = int64(i.(float64))
-	case "string":
+	case string:
 		return i.(string)
 	default:
 		return ""
@@ -201,16 +201,15 @@ func (f Function) InArray(val interface{}, array interface{}) (exists bool, inde
 	exists = false
 	index = -1
 
-	switch reflect.TypeOf(array).Kind() {
-	case reflect.Slice:
-		s := reflect.ValueOf(array)
-
-		for i := 0; i < s.Len(); i++ {
-			if reflect.DeepEqual(val, s.Index(i).Interface()) == true {
-				index = i
-				exists = true
-				return
-			}
+	arrayValue := reflect.ValueOf(array)
+	if arrayValue.Kind() != reflect.Slice {
+		return
+	}
+	for i := 0; i < arrayValue.Len(); i++ {
+		if reflect.DeepEqual(val, arrayValue.Index(i).Interface()) {
+			index = i
+			exists = true
+			return
 		}
 	}
 	return
@@ -264,11 +263,11 @@ func (f Function) handleValidData(
 		return fn(nil, ruleKey)
 	}
 	inputRuleList := strings.Split(inputRule, ".")
-	dataType := reflect.ValueOf(data).Kind()
 	nowRule := inputRuleList[0]
 	if len(inputRuleList) > 1 {
 		otherRule := strings.Join(inputRuleList[1:], ".")
-		if dataType == reflect.Slice || dataType == reflect.Array {
+		switch data.(type) {
+		case []interface{}:
 			dataList := data.([]interface{})
 			index, err := f.ParseInt(nowRule)
 			if err == nil {
@@ -288,14 +287,15 @@ func (f Function) handleValidData(
 					}
 				}
 			}
-		} else if dataType == reflect.Map {
+		case map[string]interface{}:
 			dataMap := data.(map[string]interface{})
 			if err := f.handleValidData(dataMap[nowRule], otherRule, ruleKey, fn); err != nil {
 				return err
 			}
 		}
 	} else {
-		if dataType == reflect.Slice || dataType == reflect.Array {
+		switch data.(type) {
+		case []interface{}:
 			dataList := data.([]interface{})
 			index, err := f.ParseInt(nowRule)
 			if err == nil {
@@ -306,7 +306,7 @@ func (f Function) handleValidData(
 					return err
 				}
 			}
-		} else if dataType == reflect.Map {
+		case map[string]interface{}:
 			dataMap := data.(map[string]interface{})
 			if err := fn(dataMap[nowRule], ruleKey); err != nil {
 				return err

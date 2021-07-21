@@ -64,7 +64,7 @@ func(validData interface{},validNotes string) error {
 [date_lt](#date_lt) |
 [date_lte](#date_lte) |
 [email](#email) |
-[phone](#phone) |
+[phone](#phone)
 
 #### <a id="required">required规则</a>
 验证是否必填。null，字符串为""，数字类型为0，bool类型为false，数组为[]都不通过

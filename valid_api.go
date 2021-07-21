@@ -26,15 +26,23 @@ func (v validApi) Required(data interface{}, ruleKey string) error {
 		if validData == nil {
 			return rs
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() == reflect.String && validData.(string) == "" {
-			return rs
-		} else if dataValue.Kind() == reflect.Float64 && validData.(float64) == 0 {
-			return rs
-		} else if dataValue.Kind() == reflect.Bool && validData.(bool) == false {
-			return rs
-		} else if dataValue.Kind() == reflect.Slice && len(validData.([]interface{})) == 0 {
-			return rs
+		switch validData.(type) {
+		case string:
+			if validData.(string) == "" {
+				return rs
+			}
+		case float64:
+			if validData.(float64) == 0 {
+				return rs
+			}
+		case bool:
+			if validData.(bool) == false {
+				return rs
+			}
+		case []interface{}:
+			if len(validData.([]interface{})) == 0 {
+				return rs
+			}
 		}
 		return nil
 	})
@@ -48,8 +56,7 @@ func (v validApi) Array(data interface{}, ruleKey string) error {
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() == reflect.Slice {
+		if _, bl := validData.([]interface{}); bl {
 			return nil
 		}
 		return rs
@@ -64,8 +71,7 @@ func (v validApi) Map(data interface{}, ruleKey string) error {
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() == reflect.Map {
+		if _, bl := validData.(map[string]interface{}); bl {
 			return nil
 		}
 		return rs
@@ -80,8 +86,7 @@ func (v validApi) String(data interface{}, ruleKey string) error {
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() == reflect.String {
+		if _, bl := validData.(string); bl {
 			return nil
 		}
 		return rs
@@ -98,17 +103,21 @@ func (v validApi) Len(data interface{}, ruleKey string, ruleValue string) error 
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() == reflect.String && len(validData.(string)) == int(ruleValueFloat64) {
-			return nil
-		} else if dataValue.Kind() == reflect.Slice && len(validData.([]interface{})) == int(ruleValueFloat64) {
-			return nil
+		switch validData.(type) {
+		case string:
+			if len(validData.(string)) == int(ruleValueFloat64) {
+				return nil
+			}
+		case []interface{}:
+			if len(validData.([]interface{})) == int(ruleValueFloat64) {
+				return nil
+			}
 		}
 		return rs
 	})
 }
 
-// 验证长度相等
+// 验证最小长度
 func (v validApi) Min(data interface{}, ruleKey string, ruleValue string) error {
 	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
 		ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
@@ -118,17 +127,21 @@ func (v validApi) Min(data interface{}, ruleKey string, ruleValue string) error 
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() == reflect.String && len(validData.(string)) >= int(ruleValueFloat64) {
-			return nil
-		} else if dataValue.Kind() == reflect.Slice && len(validData.([]interface{})) >= int(ruleValueFloat64) {
-			return nil
+		switch validData.(type) {
+		case string:
+			if len(validData.(string)) >= int(ruleValueFloat64) {
+				return nil
+			}
+		case []interface{}:
+			if len(validData.([]interface{})) >= int(ruleValueFloat64) {
+				return nil
+			}
 		}
 		return rs
 	})
 }
 
-// 验证长度相等
+// 验证最大长度
 func (v validApi) Max(data interface{}, ruleKey string, ruleValue string) error {
 	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
 		ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
@@ -138,11 +151,15 @@ func (v validApi) Max(data interface{}, ruleKey string, ruleValue string) error 
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() == reflect.String && len(validData.(string)) <= int(ruleValueFloat64) {
-			return nil
-		} else if dataValue.Kind() == reflect.Slice && len(validData.([]interface{})) <= int(ruleValueFloat64) {
-			return nil
+		switch validData.(type) {
+		case string:
+			if len(validData.(string)) <= int(ruleValueFloat64) {
+				return nil
+			}
+		case []interface{}:
+			if len(validData.([]interface{})) <= int(ruleValueFloat64) {
+				return nil
+			}
 		}
 		return rs
 	})
@@ -156,12 +173,11 @@ func (v validApi) Number(data interface{}, ruleKey string) error {
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() == reflect.Float64 {
+		switch validData.(type) {
+		case float64:
 			return nil
-		} else if dataValue.Kind() == reflect.String {
-			_, err := strconv.ParseFloat(validData.(string), 64)
-			if err == nil {
+		case string:
+			if _, err := strconv.ParseFloat(validData.(string), 64); err == nil {
 				return nil
 			}
 		}
@@ -177,13 +193,13 @@ func (v validApi) Integer(data interface{}, ruleKey string) error {
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
 		dataString := ""
-		if dataValue.Kind() == reflect.Float64 {
+		switch validData.(type) {
+		case float64:
 			dataString = strconv.FormatFloat(validData.(float64), 'f', -1, 64)
-		} else if dataValue.Kind() == reflect.String {
+		case string:
 			dataString = validData.(string)
-		} else {
+		default:
 			return rs
 		}
 		reg := regexp.MustCompile(`^\d*$`)
@@ -204,10 +220,12 @@ func (v validApi) Gt(data interface{}, ruleKey string, ruleValue string) error {
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() == reflect.Float64 && validData.(float64) > ruleValueFloat64 {
-			return nil
-		} else if dataValue.Kind() == reflect.String {
+		switch validData.(type) {
+		case float64:
+			if validData.(float64) > ruleValueFloat64 {
+				return nil
+			}
+		case string:
 			dataFloat64, err := strconv.ParseFloat(validData.(string), 64)
 			if err != nil {
 				return rs
@@ -230,10 +248,12 @@ func (v validApi) Gte(data interface{}, ruleKey string, ruleValue string) error 
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() == reflect.Float64 && validData.(float64) >= ruleValueFloat64 {
-			return nil
-		} else if dataValue.Kind() == reflect.String {
+		switch validData.(type) {
+		case float64:
+			if validData.(float64) >= ruleValueFloat64 {
+				return nil
+			}
+		case string:
 			dataFloat64, err := strconv.ParseFloat(validData.(string), 64)
 			if err != nil {
 				return rs
@@ -256,10 +276,12 @@ func (v validApi) Lt(data interface{}, ruleKey string, ruleValue string) error {
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() == reflect.Float64 && validData.(float64) < ruleValueFloat64 {
-			return nil
-		} else if dataValue.Kind() == reflect.String {
+		switch validData.(type) {
+		case float64:
+			if validData.(float64) < ruleValueFloat64 {
+				return nil
+			}
+		case string:
 			dataFloat64, err := strconv.ParseFloat(validData.(string), 64)
 			if err != nil {
 				return rs
@@ -282,10 +304,12 @@ func (v validApi) Lte(data interface{}, ruleKey string, ruleValue string) error 
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() == reflect.Float64 && validData.(float64) <= ruleValueFloat64 {
-			return nil
-		} else if dataValue.Kind() == reflect.String {
+		switch validData.(type) {
+		case float64:
+			if validData.(float64) <= ruleValueFloat64 {
+				return nil
+			}
+		case string:
 			dataFloat64, err := strconv.ParseFloat(validData.(string), 64)
 			if err != nil {
 				return rs
@@ -306,15 +330,14 @@ func (v validApi) Date(data interface{}, ruleKey string) error {
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() != reflect.String {
+		validDataString, bl := validData.(string)
+		if !bl {
 			return rs
 		}
-		if len(validData.(string)) > 19 {
+		if len(validDataString) > 19 {
 			return rs
 		}
-		_, err := Func.TimeParse(validData.(string))
-		if err != nil {
+		if _, err := Func.TimeParse(validDataString); err != nil {
 			return rs
 		}
 		return nil
@@ -337,11 +360,11 @@ func (v validApi) DateGt(data interface{}, ruleKey string, ruleValue string) err
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() != reflect.String {
+		validDataString, bl := validData.(string)
+		if !bl {
 			return rs
 		}
-		validDataTime, err := Func.TimeParse(validData.(string))
+		validDataTime, err := Func.TimeParse(validDataString)
 		if err != nil {
 			return rs
 		}
@@ -368,11 +391,11 @@ func (v validApi) DateGte(data interface{}, ruleKey string, ruleValue string) er
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() != reflect.String {
+		validDataString, bl := validData.(string)
+		if !bl {
 			return rs
 		}
-		validDataTime, err := Func.TimeParse(validData.(string))
+		validDataTime, err := Func.TimeParse(validDataString)
 		if err != nil {
 			return rs
 		}
@@ -399,11 +422,11 @@ func (v validApi) DateLt(data interface{}, ruleKey string, ruleValue string) err
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() != reflect.String {
+		validDataString, bl := validData.(string)
+		if !bl {
 			return rs
 		}
-		validDataTime, err := Func.TimeParse(validData.(string))
+		validDataTime, err := Func.TimeParse(validDataString)
 		if err != nil {
 			return rs
 		}
@@ -430,11 +453,11 @@ func (v validApi) DateLte(data interface{}, ruleKey string, ruleValue string) er
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() != reflect.String {
+		validDataString, bl := validData.(string)
+		if !bl {
 			return rs
 		}
-		validDataTime, err := Func.TimeParse(validData.(string))
+		validDataTime, err := Func.TimeParse(validDataString)
 		if err != nil {
 			return rs
 		}
@@ -455,19 +478,28 @@ func (v validApi) EqField(data interface{}, ruleKey string, ruleValue string) er
 			if validData == compareData {
 				return nil
 			}
-		}
-		validValue := reflect.ValueOf(validData)
-		compareValue := reflect.ValueOf(compareData)
-		if validValue.Kind() != compareValue.Kind() {
 			return rs
 		}
-		if validValue.Kind() == reflect.String ||
-			validValue.Kind() == reflect.Float64 ||
-			validValue.Kind() == reflect.Bool {
-			if validData == compareData {
-				return nil
+		switch validData.(type) {
+		case string:
+			if compareDataString, bl := compareData.(string); bl {
+				if validData.(string) == compareDataString {
+					return nil
+				}
 			}
-		} else {
+		case float64:
+			if compareDataFloat64, bl := compareData.(float64); bl {
+				if validData.(float64) == compareDataFloat64 {
+					return nil
+				}
+			}
+		case bool:
+			if compareDataBool, bl := compareData.(bool); bl {
+				if validData.(bool) == compareDataBool {
+					return nil
+				}
+			}
+		default:
 			if reflect.DeepEqual(validData, compareData) {
 				return nil
 			}
@@ -484,12 +516,12 @@ func (v validApi) Email(data interface{}, ruleKey string) error {
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() != reflect.String {
+		validDataString, bl := validData.(string)
+		if !bl {
 			return rs
 		}
 		reg := regexp.MustCompile(`^[A-Za-z0-9\\u4e00-\\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$`)
-		if reg.MatchString(validData.(string)) {
+		if reg.MatchString(validDataString) {
 			return nil
 		}
 		return rs
@@ -504,12 +536,12 @@ func (v validApi) Phone(data interface{}, ruleKey string) error {
 		if validData == nil {
 			return nil
 		}
-		dataValue := reflect.ValueOf(validData)
-		if dataValue.Kind() != reflect.String {
+		validDataString, bl := validData.(string)
+		if !bl {
 			return rs
 		}
 		reg := regexp.MustCompile(`^1[0-9]{10}$`)
-		if reg.MatchString(validData.(string)) {
+		if reg.MatchString(validDataString) {
 			return nil
 		}
 		return rs

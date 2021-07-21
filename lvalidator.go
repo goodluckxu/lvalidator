@@ -65,37 +65,29 @@ func (v *Valid) validRule(data interface{}, rule map[string]interface{}) error {
 	ruleKey := rule["key"].(string)
 	ruleList := rule["list"].([]interface{})
 	for _, val := range ruleList {
-		vValue := reflect.ValueOf(val)
-		vType := vValue.Kind()
-		if vType == reflect.String {
+		switch val.(type) {
+		case string:
 			vList := strings.Split(val.(string), ":")
 			vVal := strings.Join(vList[1:], ":")
 			if err := v.validStringRule(data, ruleKey, vList[0], vVal); err != nil {
 				return err
 			}
-		} else if vType == reflect.Func {
-			err := Func.ValidData(data, ruleKey, func(validData interface{}, validNodes string) error {
-				rValues := []reflect.Value{}
-				if validData == nil {
-					nilArg := reflect.Zero(reflect.TypeOf((*error)(nil)).Elem())
-					rValues = append(rValues, nilArg)
-				} else {
-					rValues = append(rValues, reflect.ValueOf(validData))
-				}
-				if vValue.Type().NumIn() >= 2 {
-					rValues = append(rValues, reflect.ValueOf(validNodes))
-				}
-				rs := vValue.Call(rValues)
-				errInterface := rs[0].Interface()
-				if errInterface == nil {
-					return nil
-				}
-				if err := errInterface.(error); err != nil {
+		case func(interface{}) error:
+			if err := Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+				if err := val.(func(interface{}) error)(validData); err != nil {
 					return err
 				}
 				return nil
-			})
-			if err != nil {
+			}); err != nil {
+				return err
+			}
+		case func(interface{}, string) error:
+			if err := Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+				if err := val.(func(interface{}, string) error)(validData, validNotes); err != nil {
+					return err
+				}
+				return nil
+			}); err != nil {
 				return err
 			}
 		}
