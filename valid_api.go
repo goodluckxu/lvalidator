@@ -243,7 +243,11 @@ func (v validApi) Number(data interface{}, ruleKey string) error {
 				newData := handle_interface.UpdateInterface(reflect.ValueOf(data).Elem().Interface(), []handle_interface.Rule{
 					{FindField: validRule, UpdateValue: number},
 				})
-				*data.(*interface{}) = newData
+				dataValue := reflect.ValueOf(data)
+				if dataValue.Kind() == reflect.Ptr {
+					dataValue = dataValue.Elem()
+				}
+				dataValue.Set(reflect.ValueOf(newData))
 				return nil
 			}
 		}
@@ -266,7 +270,11 @@ func (v validApi) Integer(data interface{}, ruleKey string) error {
 				newData := handle_interface.UpdateInterface(reflect.ValueOf(data).Elem().Interface(), []handle_interface.Rule{
 					{FindField: validRule, UpdateValue: validDataInt},
 				})
-				*data.(*interface{}) = newData
+				dataValue := reflect.ValueOf(data)
+				if dataValue.Kind() == reflect.Ptr {
+					dataValue = dataValue.Elem()
+				}
+				dataValue.Set(reflect.ValueOf(newData))
 				return nil
 			}
 		case string:
@@ -275,7 +283,11 @@ func (v validApi) Integer(data interface{}, ruleKey string) error {
 				newData := handle_interface.UpdateInterface(reflect.ValueOf(data).Elem().Interface(), []handle_interface.Rule{
 					{FindField: validRule, UpdateValue: int(dataInt)},
 				})
-				*data.(*interface{}) = newData
+				dataValue := reflect.ValueOf(data)
+				if dataValue.Kind() == reflect.Ptr {
+					dataValue = dataValue.Elem()
+				}
+				dataValue.Set(reflect.ValueOf(newData))
 				return nil
 			}
 		}
