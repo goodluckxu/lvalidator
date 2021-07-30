@@ -219,13 +219,13 @@ func (f Function) InArray(val interface{}, array interface{}) (exists bool, inde
 func (f Function) ValidData(
 	data interface{},
 	ruleKey string,
-	fn func(validData interface{}, validNotes string) error,
+	fn func(validData interface{}, validNotes, validRule string) error,
 ) error {
-	dataByte, _ := json.Marshal(data)
+	dataByte, _ := json.Marshal(reflect.ValueOf(data).Elem().Interface())
 	var newData interface{}
 	_ = json.Unmarshal(dataByte, &newData)
-	return f.handleValidData(newData, ruleKey, ruleKey, func(validData interface{}, rule string) error {
-		return fn(validData, f.GetNotes(ruleKey, rule))
+	return f.handleValidData(&newData, ruleKey, ruleKey, func(validData interface{}, rule string) error {
+		return fn(validData, f.GetNotes(ruleKey, rule), rule)
 	})
 }
 
@@ -254,11 +254,19 @@ func (f Function) ValidDoubleData(
 
 // 处理验证数据
 func (f Function) handleValidData(
-	data interface{},
+	newData interface{},
 	inputRule string,
 	ruleKey string,
 	fn func(validData interface{}, rule string) error,
 ) error {
+	if newData == nil {
+		return fn(nil, ruleKey)
+	}
+	dataValue := reflect.ValueOf(newData)
+	if dataValue.Kind() == reflect.Ptr {
+		dataValue = dataValue.Elem()
+	}
+	data := dataValue.Interface()
 	if data == nil {
 		return fn(nil, ruleKey)
 	}

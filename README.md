@@ -63,6 +63,7 @@ func(validData interface{},validNotes string) error {
 [date_gte](#date_gte) |
 [date_lt](#date_lt) |
 [date_lte](#date_lte) |
+[eq_field](#eq_field) |
 [email](#email) |
 [phone](#phone)
 
@@ -172,6 +173,12 @@ date_lt:2002-02-05
 验证日期是否小于等于某个值
 ~~~
 date_lte:2002-02-05
+~~~
+
+#### <a id="eq_field">eq_field规则</a>
+验证两个字段是否相同，field为传的其他字段
+~~~
+eq_field:field
 ~~~
 
 #### <a id="email">email规则</a>

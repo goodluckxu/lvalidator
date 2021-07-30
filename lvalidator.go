@@ -11,8 +11,8 @@ import (
 )
 
 type Valid struct {
-	request     *http.Request
-	validApi    validApi
+	request  *http.Request
+	validApi validApi
 }
 
 func New(r *http.Request) *Valid {
@@ -30,9 +30,8 @@ func (v *Valid) ValidJson(rules map[string]interface{}, data interface{}) error 
 	if err := json.Unmarshal(body, data); err != nil {
 		return err
 	}
-	newData := reflect.ValueOf(data).Elem().Interface()
 	for _, rule := range ruleList {
-		err := v.validRule(newData, rule)
+		err := v.validRule(data, rule)
 		if err != nil {
 			return err
 		}
@@ -72,7 +71,7 @@ func (v *Valid) validRule(data interface{}, rule map[string]interface{}) error {
 				return err
 			}
 		case func(interface{}) error:
-			if err := Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+			if err := Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 				if err := val.(func(interface{}) error)(validData); err != nil {
 					return err
 				}
@@ -81,7 +80,7 @@ func (v *Valid) validRule(data interface{}, rule map[string]interface{}) error {
 				return err
 			}
 		case func(interface{}, string) error:
-			if err := Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+			if err := Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 				if err := val.(func(interface{}, string) error)(validData, validNotes); err != nil {
 					return err
 				}

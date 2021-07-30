@@ -2,6 +2,7 @@ package lvalidator
 
 import (
 	"errors"
+	"github.com/goodluckxu/go-lib/handle_interface"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -20,7 +21,7 @@ type validApi struct {
 
 // 验证必填
 func (v validApi) Required(data interface{}, ruleKey string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		info := strings.ReplaceAll(Lang.Required, "{ruleKey}", validNotes)
 		rs := errors.New(info)
 		if validData == nil {
@@ -50,7 +51,7 @@ func (v validApi) Required(data interface{}, ruleKey string) error {
 
 // 验证数组
 func (v validApi) Array(data interface{}, ruleKey string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		info := strings.ReplaceAll(Lang.Array, "{ruleKey}", validNotes)
 		rs := errors.New(info)
 		if validData == nil {
@@ -65,7 +66,7 @@ func (v validApi) Array(data interface{}, ruleKey string) error {
 
 // 验证对象
 func (v validApi) Map(data interface{}, ruleKey string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		info := strings.ReplaceAll(Lang.Map, "{ruleKey}", validNotes)
 		rs := errors.New(info)
 		if validData == nil {
@@ -80,7 +81,7 @@ func (v validApi) Map(data interface{}, ruleKey string) error {
 
 // 验证字符串
 func (v validApi) String(data interface{}, ruleKey string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		info := strings.ReplaceAll(Lang.String, "{ruleKey}", validNotes)
 		rs := errors.New(info)
 		if validData == nil {
@@ -95,7 +96,7 @@ func (v validApi) String(data interface{}, ruleKey string) error {
 
 // 验证长度相等
 func (v validApi) Len(data interface{}, ruleKey string, ruleValue string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
 		info := strings.ReplaceAll(Lang.Len, "{ruleKey}", validNotes)
 		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
@@ -119,7 +120,7 @@ func (v validApi) Len(data interface{}, ruleKey string, ruleValue string) error 
 
 // 验证最小长度
 func (v validApi) Min(data interface{}, ruleKey string, ruleValue string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
 		info := strings.ReplaceAll(Lang.Min, "{ruleKey}", validNotes)
 		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
@@ -143,7 +144,7 @@ func (v validApi) Min(data interface{}, ruleKey string, ruleValue string) error 
 
 // 验证最大长度
 func (v validApi) Max(data interface{}, ruleKey string, ruleValue string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
 		info := strings.ReplaceAll(Lang.Max, "{ruleKey}", validNotes)
 		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
@@ -167,7 +168,7 @@ func (v validApi) Max(data interface{}, ruleKey string, ruleValue string) error 
 
 // 验证数字
 func (v validApi) Number(data interface{}, ruleKey string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		info := strings.ReplaceAll(Lang.Number, "{ruleKey}", validNotes)
 		rs := errors.New(info)
 		if validData == nil {
@@ -177,7 +178,11 @@ func (v validApi) Number(data interface{}, ruleKey string) error {
 		case float64:
 			return nil
 		case string:
-			if _, err := strconv.ParseFloat(validData.(string), 64); err == nil {
+			if number, err := strconv.ParseFloat(validData.(string), 64); err == nil {
+				newData := handle_interface.UpdateInterface(reflect.ValueOf(data).Elem().Interface(), []handle_interface.Rule{
+					{FindField: validRule, UpdateValue: number},
+				})
+				*data.(*interface{}) = newData
 				return nil
 			}
 		}
@@ -187,32 +192,39 @@ func (v validApi) Number(data interface{}, ruleKey string) error {
 
 // 验证整数
 func (v validApi) Integer(data interface{}, ruleKey string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		info := strings.ReplaceAll(Lang.Integer, "{ruleKey}", validNotes)
 		rs := errors.New(info)
 		if validData == nil {
 			return nil
 		}
-		dataString := ""
 		switch validData.(type) {
 		case float64:
-			dataString = strconv.FormatFloat(validData.(float64), 'f', -1, 64)
+			validDataInt := int(validData.(float64))
+			if validData.(float64) == float64(validDataInt) {
+				newData := handle_interface.UpdateInterface(reflect.ValueOf(data).Elem().Interface(), []handle_interface.Rule{
+					{FindField: validRule, UpdateValue: validDataInt},
+				})
+				*data.(*interface{}) = newData
+				return nil
+			}
 		case string:
-			dataString = validData.(string)
-		default:
-			return rs
+			dataInt, err := strconv.ParseInt(validData.(string), 10, 64)
+			if err == nil {
+				newData := handle_interface.UpdateInterface(reflect.ValueOf(data).Elem().Interface(), []handle_interface.Rule{
+					{FindField: validRule, UpdateValue: int(dataInt)},
+				})
+				*data.(*interface{}) = newData
+				return nil
+			}
 		}
-		reg := regexp.MustCompile(`^\d*$`)
-		if !reg.MatchString(dataString) {
-			return rs
-		}
-		return nil
+		return rs
 	})
 }
 
 // 验证大于
 func (v validApi) Gt(data interface{}, ruleKey string, ruleValue string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
 		info := strings.ReplaceAll(Lang.Gt, "{ruleKey}", validNotes)
 		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
@@ -240,7 +252,7 @@ func (v validApi) Gt(data interface{}, ruleKey string, ruleValue string) error {
 
 // 验证大于等于
 func (v validApi) Gte(data interface{}, ruleKey string, ruleValue string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
 		info := strings.ReplaceAll(Lang.Gte, "{ruleKey}", validNotes)
 		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
@@ -268,7 +280,7 @@ func (v validApi) Gte(data interface{}, ruleKey string, ruleValue string) error 
 
 // 验证小于
 func (v validApi) Lt(data interface{}, ruleKey string, ruleValue string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
 		info := strings.ReplaceAll(Lang.Lt, "{ruleKey}", validNotes)
 		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
@@ -296,7 +308,7 @@ func (v validApi) Lt(data interface{}, ruleKey string, ruleValue string) error {
 
 // 验证小于等于
 func (v validApi) Lte(data interface{}, ruleKey string, ruleValue string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		ruleValueFloat64, _ := strconv.ParseFloat(ruleValue, 64)
 		info := strings.ReplaceAll(Lang.Lte, "{ruleKey}", validNotes)
 		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
@@ -324,7 +336,7 @@ func (v validApi) Lte(data interface{}, ruleKey string, ruleValue string) error 
 
 // 验证日期
 func (v validApi) Date(data interface{}, ruleKey string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		info := strings.ReplaceAll(Lang.Date, "{ruleKey}", validNotes)
 		rs := errors.New(info)
 		if validData == nil {
@@ -346,7 +358,7 @@ func (v validApi) Date(data interface{}, ruleKey string) error {
 
 // 日期大于
 func (v validApi) DateGt(data interface{}, ruleKey string, ruleValue string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		ruleValueTime, err := Func.TimeParse(ruleValue)
 		if err != nil {
 			info := strings.ReplaceAll(Lang.Error, "{rule}", "date_gt")
@@ -377,7 +389,7 @@ func (v validApi) DateGt(data interface{}, ruleKey string, ruleValue string) err
 
 // 日期大于等于
 func (v validApi) DateGte(data interface{}, ruleKey string, ruleValue string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		ruleValueTime, err := Func.TimeParse(ruleValue)
 		if err != nil {
 			info := strings.ReplaceAll(Lang.Error, "{rule}", "date_gt")
@@ -408,7 +420,7 @@ func (v validApi) DateGte(data interface{}, ruleKey string, ruleValue string) er
 
 // 日期小于
 func (v validApi) DateLt(data interface{}, ruleKey string, ruleValue string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		ruleValueTime, err := Func.TimeParse(ruleValue)
 		if err != nil {
 			info := strings.ReplaceAll(Lang.Error, "{rule}", "date_gt")
@@ -439,7 +451,7 @@ func (v validApi) DateLt(data interface{}, ruleKey string, ruleValue string) err
 
 // 日期小于等于
 func (v validApi) DateLte(data interface{}, ruleKey string, ruleValue string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		ruleValueTime, err := Func.TimeParse(ruleValue)
 		if err != nil {
 			info := strings.ReplaceAll(Lang.Error, "{rule}", "date_gt")
@@ -510,7 +522,7 @@ func (v validApi) EqField(data interface{}, ruleKey string, ruleValue string) er
 
 // 验证邮箱
 func (v validApi) Email(data interface{}, ruleKey string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		info := strings.ReplaceAll(Lang.Email, "{ruleKey}", validNotes)
 		rs := errors.New(info)
 		if validData == nil {
@@ -530,7 +542,7 @@ func (v validApi) Email(data interface{}, ruleKey string) error {
 
 // 验证手机
 func (v validApi) Phone(data interface{}, ruleKey string) error {
-	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		info := strings.ReplaceAll(Lang.Phone, "{ruleKey}", validNotes)
 		rs := errors.New(info)
 		if validData == nil {
