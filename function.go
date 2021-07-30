@@ -313,6 +313,15 @@ func (f Function) handleValidData(
 				if err := fn(dataList[index], ruleKey); err != nil {
 					return err
 				}
+			} else {
+				for key, val := range dataList {
+					indexStr := f.formatNumber(key)
+					dLen := len(ruleKey) - len(inputRule)
+					newRuleKey := ruleKey[0:dLen] + indexStr
+					if err := fn(val, newRuleKey); err != nil {
+						return err
+					}
+				}
 			}
 		case map[string]interface{}:
 			dataMap := data.(map[string]interface{})
