@@ -15,6 +15,7 @@ func (z *ZhCn) Init() {
 	z.Max = "{ruleKey}最大长度为{ruleValue}"
 	z.Number = "{ruleKey}必须是数字"
 	z.Integer = "{ruleKey}必须是整数"
+	z.Bool = "{ruleKey}必须是布尔类型"
 	z.Gt = "{ruleKey}必须大于{ruleValue}"
 	z.Gte = "{ruleKey}必须大于等于{ruleValue}"
 	z.Lt = "{ruleKey}必须小于{ruleValue}"

@@ -11,6 +11,7 @@ type Lang struct {
 	Max      string // 最大长度
 	Number   string // 数字
 	Integer  string // 整数
+	Bool     string // 布尔类型
 	Gt       string // 大于
 	Gte      string // 大于等于
 	Lt       string // 小于

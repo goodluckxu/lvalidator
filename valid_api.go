@@ -222,6 +222,27 @@ func (v validApi) Integer(data interface{}, ruleKey string) error {
 	})
 }
 
+// 验证布尔
+func (v validApi) Bool(data interface{}, ruleKey string, ruleValue string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
+		info := strings.ReplaceAll(Lang.Bool, "{ruleKey}", validNotes)
+		rs := errors.New(info)
+		if validData == nil {
+			return nil
+		}
+		switch validData.(type) {
+		case bool:
+			return nil
+		case float64:
+			validDataFloat := validData.(float64)
+			if validDataFloat == 0 || validDataFloat == 1 {
+				return nil
+			}
+		}
+		return rs
+	})
+}
+
 // 验证大于
 func (v validApi) Gt(data interface{}, ruleKey string, ruleValue string) error {
 	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {

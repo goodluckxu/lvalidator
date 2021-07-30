@@ -54,6 +54,7 @@ func(validData interface{},validNotes string) error {
 [max](#max) |
 [number](#number) |
 [integer](#integer) |
+[bool](#bool) |
 [gt](#gt) |
 [gte](#gte) |
 [lt](#lt) |
@@ -119,6 +120,12 @@ number
 验证是否是整数。可验证数字和字符串的数字
 ~~~
 integer
+~~~
+
+#### <a id="bool">bool规则</a>
+验证是否是布尔类型。可验证整数和布尔类型
+~~~
+bool
 ~~~
 
 #### <a id="gt">gt规则</a>
