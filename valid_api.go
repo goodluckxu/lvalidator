@@ -106,7 +106,7 @@ func (v validApi) ValidConditionField(data interface{}, ruleKey string, ruleValu
 }
 
 // 验证必填
-func (v validApi) Required(data interface{}, ruleKey string) error {
+func (v validApi) Required(data interface{}, ruleKey string, ruleValue string) error {
 	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		info := strings.ReplaceAll(Lang.Required, "{ruleKey}", validNotes)
 		rs := errors.New(info)
@@ -115,19 +115,19 @@ func (v validApi) Required(data interface{}, ruleKey string) error {
 		}
 		switch validData.(type) {
 		case string:
-			if validData.(string) == "" {
+			if validData.(string) == "" && ruleValue != "string" {
 				return rs
 			}
 		case float64:
-			if validData.(float64) == 0 {
+			if validData.(float64) == 0 && ruleValue != "integer" {
 				return rs
 			}
 		case bool:
-			if validData.(bool) == false {
+			if validData.(bool) == false && ruleValue != "bool" {
 				return rs
 			}
 		case []interface{}:
-			if len(validData.([]interface{})) == 0 {
+			if len(validData.([]interface{})) == 0 && ruleValue != "array" {
 				return rs
 			}
 		}
@@ -676,5 +676,22 @@ func (v validApi) Phone(data interface{}, ruleKey string) error {
 			return nil
 		}
 		return rs
+	})
+}
+
+// 验证是否在数组里面
+func (v validApi) In(data interface{}, ruleKey string, ruleValue string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
+		info := strings.ReplaceAll(Lang.In, "{ruleKey}", validNotes)
+		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
+		rs := errors.New(info)
+		if validData == nil {
+			return nil
+		}
+		list := strings.Split(ruleValue, ",")
+		if bl, _ := Func.InArray(Func.formatNumber(validData), list); !bl {
+			return rs
+		}
+		return nil
 	})
 }

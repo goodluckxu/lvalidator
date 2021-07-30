@@ -24,4 +24,5 @@ type Lang struct {
 	EqField  string // 等于字段
 	Email    string // 邮箱
 	Phone    string // 手机
+	In       string // 是否在数组里面
 }
