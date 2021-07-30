@@ -47,7 +47,7 @@ func (v validApi) ThroughConditionField(data interface{}, ruleKey string, ruleVa
 				}
 				switch whereList[0] {
 				case "=":
-					if Func.formatNumber(compareData) != whereList[1] {
+					if strings.Compare(Func.formatNumber(compareData), whereList[1]) != 0 {
 						return errors.New("")
 					}
 				case ">":
