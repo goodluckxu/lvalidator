@@ -21,7 +21,7 @@ type validApi struct {
 // 返值 error 错误信息
 
 // 验证字段条件满足通过
-func (v validApi) ThroughConditionField(data interface{}, ruleKey string, ruleValue string) error {
+func (v validApi) ValidConditionField(data interface{}, ruleKey string, ruleValue string) error {
 	info := strings.ReplaceAll(Lang.Error, "{rule}", "through_condition_field")
 	info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
 	info = strings.ReplaceAll(info, "{error}", "规则不正确")
@@ -40,6 +40,7 @@ func (v validApi) ThroughConditionField(data interface{}, ruleKey string, ruleVa
 			if !Func.IsTwoFieldCompare(rule, compareRule, starInfo) {
 				return nil
 			}
+			isValid := true
 			for _, whereString := range whereStringList {
 				whereList := strings.Split(whereString, " ")
 				if len(whereList) != 2 {
@@ -48,33 +49,57 @@ func (v validApi) ThroughConditionField(data interface{}, ruleKey string, ruleVa
 				switch whereList[0] {
 				case "=":
 					if strings.Compare(Func.formatNumber(compareData), whereList[1]) != 0 {
-						return errors.New("")
+						isValid = false
 					}
 				case ">":
-					if strings.Compare(Func.formatNumber(compareData), whereList[1]) != 1 {
-						return errors.New("")
+					compareFloat64, compareErr := strconv.ParseFloat(Func.formatNumber(compareData), 64)
+					whereFloat64, whereErr := strconv.ParseFloat(Func.formatNumber(whereList[1]), 64)
+					if compareErr != nil || whereErr != nil {
+						return rs
+					}
+					if compareFloat64 <= whereFloat64 {
+						isValid = false
 					}
 				case ">=":
-					if strings.Compare(Func.formatNumber(compareData), whereList[1]) == -1 {
-						return errors.New("")
+					compareFloat64, compareErr := strconv.ParseFloat(Func.formatNumber(compareData), 64)
+					whereFloat64, whereErr := strconv.ParseFloat(Func.formatNumber(whereList[1]), 64)
+					if compareErr != nil || whereErr != nil {
+						return rs
+					}
+					if compareFloat64 < whereFloat64 {
+						isValid = false
 					}
 				case "<":
-					if strings.Compare(Func.formatNumber(compareData), whereList[1]) != -1 {
-						return errors.New("")
+					compareFloat64, compareErr := strconv.ParseFloat(Func.formatNumber(compareData), 64)
+					whereFloat64, whereErr := strconv.ParseFloat(Func.formatNumber(whereList[1]), 64)
+					if compareErr != nil || whereErr != nil {
+						return rs
+					}
+					if compareFloat64 >= whereFloat64 {
+						isValid = false
 					}
 				case "<=":
-					if strings.Compare(Func.formatNumber(compareData), whereList[1]) == 1 {
-						return errors.New("")
+					compareFloat64, compareErr := strconv.ParseFloat(Func.formatNumber(compareData), 64)
+					whereFloat64, whereErr := strconv.ParseFloat(Func.formatNumber(whereList[1]), 64)
+					if compareErr != nil || whereErr != nil {
+						return rs
+					}
+					if compareFloat64 > whereFloat64 {
+						isValid = false
 					}
 				case "in":
 					stringList := strings.Split(whereList[1], ";")
 					if bl, _ := Func.InArray(Func.formatNumber(compareData), stringList); !bl {
-						return errors.New("")
+						isValid = false
 					}
 				default:
 					return rs
 				}
 			}
+			if !isValid {
+				return errors.New("")
+			}
+			// nil时需要验证，errors空字符串是通过
 			return nil
 		})
 	})
