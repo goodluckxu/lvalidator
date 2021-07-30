@@ -67,7 +67,7 @@ func(validData interface{},validNotes string) error {
 [date_lte](#date_lte) |
 [eq_field](#eq_field) |
 [email](#email) |
-[phone](#phone)
+[phone](#phone) |
 [in](#in)
 
 #### <a id="valid_condition_field">valid_condition_field规则</a>
