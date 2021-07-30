@@ -45,7 +45,7 @@ func(validData interface{},validNotes string) error {
 ~~~
 
 ## 所有验证规则
-[through_condition_field](#through_condition_field)
+[valid_condition_field](#through_condition_field)
 [required](#required) |
 [array](#array) |
 [map](#map) |
@@ -69,7 +69,7 @@ func(validData interface{},validNotes string) error {
 [email](#email) |
 [phone](#phone)
 
-#### <a id="through_condition_field">through_condition_field规则</a>
+#### <a id="valid_condition_field">valid_condition_field规则</a>
 如果条件满足则验证后面的规则，field为传入字段，condition为条件
 
 condition规则为 =,>,>=,<,<=,in，多个条件用&分隔，格式为= 1&< 5&in 12;15
