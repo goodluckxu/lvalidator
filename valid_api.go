@@ -1,6 +1,7 @@
 package lvalidator
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/goodluckxu/go-lib/handle_interface"
 	"reflect"
@@ -18,6 +19,66 @@ type validApi struct {
 // 传值 ruleKey 验证的字段
 // 传值 ruleValue 需要验证的规则(非必传)
 // 返值 error 错误信息
+
+// 验证字段条件满足通过
+func (v validApi) ThroughConditionField(data interface{}, ruleKey string, ruleValue string) error {
+	info := strings.ReplaceAll(Lang.Error, "{rule}", "through_condition_field")
+	info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
+	info = strings.ReplaceAll(info, "{error}", "规则不正确")
+	rs := errors.New(info)
+	dataByte, _ := json.Marshal(data)
+	var newData interface{}
+	_ = json.Unmarshal(dataByte, &newData)
+	ruleValueList := strings.Split(ruleValue, ",")
+	if len(ruleValueList) != 2 {
+		return rs
+	}
+	whereStringList := strings.Split(ruleValueList[1], "&")
+	starInfo := Func.GetTwoFieldStarInfo(ruleKey, ruleValueList[0])
+	return Func.handleValidData(newData, ruleKey, ruleKey, func(validData interface{}, rule string) error {
+		return Func.handleValidData(newData, ruleValueList[0], ruleValueList[0], func(compareData interface{}, compareRule string) error {
+			if !Func.IsTwoFieldCompare(rule, compareRule, starInfo) {
+				return nil
+			}
+			for _, whereString := range whereStringList {
+				whereList := strings.Split(whereString, " ")
+				if len(whereList) != 2 {
+					return rs
+				}
+				switch whereList[0] {
+				case "=":
+					if Func.formatNumber(compareData) != whereList[1] {
+						return errors.New("")
+					}
+				case ">":
+					if strings.Compare(Func.formatNumber(compareData), whereList[1]) != 1 {
+						return errors.New("")
+					}
+				case ">=":
+					if strings.Compare(Func.formatNumber(compareData), whereList[1]) == -1 {
+						return errors.New("")
+					}
+				case "<":
+					if strings.Compare(Func.formatNumber(compareData), whereList[1]) != -1 {
+						return errors.New("")
+					}
+				case "<=":
+					if strings.Compare(Func.formatNumber(compareData), whereList[1]) == 1 {
+						return errors.New("")
+					}
+				case "in":
+					stringList := strings.Split(whereList[1], ";")
+					if bl, _ := Func.InArray(Func.formatNumber(compareData), stringList); !bl {
+						return errors.New("")
+					}
+				default:
+					return rs
+				}
+			}
+			return nil
+		})
+	})
+}
 
 // 验证必填
 func (v validApi) Required(data interface{}, ruleKey string) error {
