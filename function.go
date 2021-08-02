@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"reflect"
@@ -403,4 +404,92 @@ func (f Function) GetNotes(ruleKey, rule string) string {
 		notes = rule
 	}
 	return notes
+}
+
+
+/**
+ * 验证事件
+ */
+func (f Function) ValidDate(date string, format string) (err error) {
+	err = fmt.Errorf("日期格式和值不匹配，格式：%s, 值：%s", format, date)
+	format = strings.ReplaceAll(format, "Y", "YYYY")
+	format = strings.ReplaceAll(format, "m", "mm")
+	format = strings.ReplaceAll(format, "d", "dd")
+	format = strings.ReplaceAll(format, "H", "HH")
+	format = strings.ReplaceAll(format, "i", "ii")
+	format = strings.ReplaceAll(format, "s", "ss")
+	if len(date) != len(format) {
+		return
+	}
+	if err := f.validSingleDate("YYYY", &date, &format); err != nil {
+		return err
+	}
+	if err := f.validSingleDate("mm", &date, &format); err != nil {
+		return err
+	}
+	if err := f.validSingleDate("dd", &date, &format); err != nil {
+		return err
+	}
+	if err := f.validSingleDate("HH", &date, &format); err != nil {
+		return err
+	}
+	if err := f.validSingleDate("ii", &date, &format); err != nil {
+		return err
+	}
+	if err := f.validSingleDate("ss", &date, &format); err != nil {
+		return err
+	}
+	if date != format {
+		return
+	}
+	return nil
+}
+
+func (f Function) validSingleDate(single string, date, format *string) error {
+	lenSingle := len(single)
+	newDate := *date
+	newFormat := *format
+	for {
+		index := strings.Index(newFormat, single)
+		if index == -1 {
+			break
+		}
+		validDate := newDate[index : index+lenSingle]
+		switch single {
+		case "YYYY":
+			if !regexp.MustCompile(`\d{4}`).MatchString(validDate) {
+				return fmt.Errorf("年格式和值不匹配，格式：Y, 值：%s", validDate)
+			}
+		case "mm":
+			validInt64, _ := strconv.ParseInt(validDate, 10, 64)
+			if validInt64 < 1 || validInt64 > 12 {
+				return fmt.Errorf("月格式和值不匹配，格式：m, 值：%s", validDate)
+			}
+		case "dd":
+			validInt64, _ := strconv.ParseInt(validDate, 10, 64)
+			if validInt64 < 1 || validInt64 > 31 {
+				return fmt.Errorf("日格式和值不匹配，格式：d, 值：%s", validDate)
+			}
+		case "HH":
+			validInt64, _ := strconv.ParseInt(validDate, 10, 64)
+			if validInt64 < 0 || validInt64 > 23 {
+				return fmt.Errorf("时格式和值不匹配，格式：H, 值：%s", validDate)
+			}
+		case "ii":
+			validInt64, _ := strconv.ParseInt(validDate, 10, 64)
+			if validInt64 < 0 || validInt64 > 59 {
+				return fmt.Errorf("分格式和值不匹配，格式：i, 值：%s", validDate)
+			}
+		case "ss":
+			validInt64, _ := strconv.ParseInt(validDate, 10, 64)
+			if validInt64 < 0 || validInt64 > 59 {
+				return fmt.Errorf("秒格式和值不匹配，格式：s, 值：%s", validDate)
+			}
+		}
+		newFormat = newFormat[0:index] + newFormat[index+lenSingle:]
+		newDate = newDate[0:index] + newDate[index+lenSingle:]
+	}
+	*date = newDate
+	*format = newFormat
+	return nil
 }

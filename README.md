@@ -61,6 +61,7 @@ func(validData interface{},validNotes string) error {
 [lt](#lt) |
 [lte](#lte) |
 [date](#date) |
+[date_format](#date_format) |
 [date_gt](#date_gt) |
 [date_gte](#date_gte) |
 [date_lt](#date_lt) |
@@ -167,6 +168,12 @@ lte:10
 验证是否是日期格式 Y-m-d H:i:s类型
 ~~~
 date
+~~~
+
+#### <a id="date_format">date_format规则</a>
+自定义验证是否是日期格式 Y-m-d H:i:s类型，自定义类型 Y年，m月，d日，H时，i分，s秒
+~~~
+date_format:Y-m-d H:i:s
 ~~~
 
 #### <a id="date_gt">date_gt规则</a>

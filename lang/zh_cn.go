@@ -21,6 +21,7 @@ func (z *ZhCn) Init() {
 	z.Lt = "{ruleKey}必须小于{ruleValue}"
 	z.Lte = "{ruleKey}必须小于等于{ruleValue}"
 	z.Date = "{ruleKey}必须是日期格式"
+	z.DateFormat = "{ruleKey}必须是日期格式{ruleValue}"
 	z.DateGt = "{ruleKey}必须大于{ruleValue}"
 	z.DateGte = "{ruleKey}必须大于等于{ruleValue}"
 	z.DateLt = "{ruleKey}必须小于{ruleValue}"

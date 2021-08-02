@@ -475,6 +475,29 @@ func (v validApi) Date(data interface{}, ruleKey string) error {
 	})
 }
 
+// 验证日期格式化
+func (v validApi) DateFormat(data interface{}, ruleKey string, ruleValue string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
+		info := strings.ReplaceAll(Lang.DateFormat, "{ruleKey}", validNotes)
+		info = strings.ReplaceAll(Lang.DateFormat, "{ruleValue}", ruleValue)
+		rs := errors.New(info)
+		if validData == nil {
+			return nil
+		}
+		validDataString, bl := validData.(string)
+		if !bl {
+			return rs
+		}
+		if ruleValue == "" {
+			ruleValue = "Y-m-d H:i:s"
+		}
+		if err := Func.ValidDate(validDataString, ruleValue); err != nil {
+			return rs
+		}
+		return nil
+	})
+}
+
 // 日期大于
 func (v validApi) DateGt(data interface{}, ruleKey string, ruleValue string) error {
 	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
