@@ -45,7 +45,7 @@ func(validData interface{},validNotes string) error {
 ~~~
 
 ## 所有验证规则
-[valid_condition_field](#valid_condition_field)
+[valid_condition_field](#valid_condition_field) |
 [required](#required) |
 [array](#array) |
 [map](#map) |
