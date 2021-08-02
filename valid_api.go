@@ -292,21 +292,13 @@ func (v validApi) Integer(data interface{}, ruleKey string) error {
 		case float64:
 			validDataInt := int(validData.(float64))
 			if validData.(float64) == float64(validDataInt) {
-				newData := handle_interface.UpdateInterface(reflect.ValueOf(data).Elem().Interface(), []handle_interface.Rule{
-					{FindField: validRule, UpdateValue: validDataInt},
-				})
-				dataValue := reflect.ValueOf(data)
-				if dataValue.Kind() == reflect.Ptr {
-					dataValue = dataValue.Elem()
-				}
-				dataValue.Set(reflect.ValueOf(newData))
 				return nil
 			}
 		case string:
 			dataInt, err := strconv.ParseInt(validData.(string), 10, 64)
 			if err == nil {
 				newData := handle_interface.UpdateInterface(reflect.ValueOf(data).Elem().Interface(), []handle_interface.Rule{
-					{FindField: validRule, UpdateValue: int(dataInt)},
+					{FindField: validRule, UpdateValue: float64(dataInt)},
 				})
 				dataValue := reflect.ValueOf(data)
 				if dataValue.Kind() == reflect.Ptr {
