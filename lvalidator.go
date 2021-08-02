@@ -68,12 +68,12 @@ func (v *Valid) validRule(data interface{}, rule map[string]interface{}) error {
 			vList := strings.Split(val.(string), ":")
 			vVal := strings.Join(vList[1:], ":")
 			if err := v.validStringRule(data, ruleKey, vList[0], vVal); err != nil {
-				if vList[0] == "through_condition_field" && err.Error() == "" {
+				if vList[0] == "valid_condition_field" && err.Error() == "" {
 					continue
 				}
 				return err
 			}
-			if vList[0] == "through_condition_field" {
+			if vList[0] == "valid_condition_field" {
 				return nil
 			}
 		case func(interface{}) error:

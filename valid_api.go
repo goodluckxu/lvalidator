@@ -22,7 +22,7 @@ type validApi struct {
 
 // 验证字段条件满足通过
 func (v validApi) ValidConditionField(data interface{}, ruleKey string, ruleValue string) error {
-	info := strings.ReplaceAll(Lang.Error, "{rule}", "through_condition_field")
+	info := strings.ReplaceAll(Lang.Error, "{rule}", "valid_condition_field")
 	info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
 	info = strings.ReplaceAll(info, "{error}", "规则不正确")
 	rs := errors.New(info)
