@@ -1,7 +1,7 @@
 package lvalidator
 
 import (
-	"lvalidator/lang"
+	"github.com/goodluckxu/lvalidator/lang"
 	"reflect"
 )
 
