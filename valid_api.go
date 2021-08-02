@@ -96,7 +96,7 @@ func (v validApi) ValidConditionField(data interface{}, ruleKey string, ruleValu
 					return rs
 				}
 			}
-			if !isValid {
+			if isValid {
 				return errors.New("")
 			}
 			// nil时需要验证，errors空字符串是通过
