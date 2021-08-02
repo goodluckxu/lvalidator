@@ -479,7 +479,7 @@ func (v validApi) Date(data interface{}, ruleKey string) error {
 func (v validApi) DateFormat(data interface{}, ruleKey string, ruleValue string) error {
 	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		info := strings.ReplaceAll(Lang.DateFormat, "{ruleKey}", validNotes)
-		info = strings.ReplaceAll(Lang.DateFormat, "{ruleValue}", ruleValue)
+		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
 		rs := errors.New(info)
 		if validData == nil {
 			return nil
