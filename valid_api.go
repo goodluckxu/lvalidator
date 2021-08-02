@@ -119,7 +119,7 @@ func (v validApi) Required(data interface{}, ruleKey string, ruleValue string) e
 				return rs
 			}
 		case float64:
-			if validData.(float64) == 0 && ruleValue != "integer" {
+			if validData.(float64) == 0 && ruleValue != "number" {
 				return rs
 			}
 		case bool:
