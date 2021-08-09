@@ -30,4 +30,6 @@ func (z *ZhCn) Init() {
 	z.Email = "{ruleKey}必须是邮箱"
 	z.Phone = "{ruleKey}必须是手机号"
 	z.In = "{ruleKey}必须在数组({ruleValue})中"
+	z.Unique = "{ruleKey}重复"
+	z.Regexp = "{ruleKey}验证错误"
 }

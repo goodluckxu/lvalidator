@@ -406,9 +406,8 @@ func (f Function) GetNotes(ruleKey, rule string) string {
 	return notes
 }
 
-
 /**
- * 验证事件
+ * 验证时间
  */
 func (f Function) ValidDate(date string, format string) (err error) {
 	err = fmt.Errorf("日期格式和值不匹配，格式：%s, 值：%s", format, date)
@@ -492,4 +491,33 @@ func (f Function) validSingleDate(single string, date, format *string) error {
 	*date = newDate
 	*format = newFormat
 	return nil
+}
+
+// 比较两个数是否相等
+func (f Function) IsEqualData(dataOne, dataTwo interface{}) bool {
+	switch dataOne.(type) {
+	case string:
+		if compareDataString, bl := dataTwo.(string); bl {
+			if dataOne.(string) == compareDataString {
+				return true
+			}
+		}
+	case float64:
+		if compareDataFloat64, bl := dataTwo.(float64); bl {
+			if dataOne.(float64) == compareDataFloat64 {
+				return true
+			}
+		}
+	case bool:
+		if compareDataBool, bl := dataTwo.(bool); bl {
+			if dataOne.(bool) == compareDataBool {
+				return true
+			}
+		}
+	default:
+		if reflect.DeepEqual(dataOne, dataTwo) {
+			return true
+		}
+	}
+	return false
 }

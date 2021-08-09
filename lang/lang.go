@@ -26,4 +26,6 @@ type Lang struct {
 	Email      string // 邮箱
 	Phone      string // 手机
 	In         string // 是否在数组里面
+	Unique     string // 数组内的值唯一
+	Regexp     string // 正则验证
 }

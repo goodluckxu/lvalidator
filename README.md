@@ -69,7 +69,9 @@ func(validData interface{},validNotes string) error {
 [eq_field](#eq_field) |
 [email](#email) |
 [phone](#phone) |
-[in](#in)
+[in](#in) |
+[unique](#unique) |
+[regexp](#regexp)
 
 #### <a id="valid_condition_field">valid_condition_field规则</a>
 如果条件满足则验证后面的规则，field为传入字段，condition为条件
@@ -222,4 +224,16 @@ phone
 验证是否在数组里面
 ~~~
 in:1,2,3
+~~~
+
+#### <a id="unique">unique规则</a>
+验证数组内的值唯一
+~~~
+unique
+~~~
+
+#### <a id="regexp">regexp规则</a>
+验证正则表达式
+~~~
+regexp:^\d$
 ~~~

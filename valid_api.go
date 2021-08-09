@@ -626,29 +626,8 @@ func (v validApi) EqField(data interface{}, ruleKey string, ruleValue string) er
 			}
 			return rs
 		}
-		switch validData.(type) {
-		case string:
-			if compareDataString, bl := compareData.(string); bl {
-				if validData.(string) == compareDataString {
-					return nil
-				}
-			}
-		case float64:
-			if compareDataFloat64, bl := compareData.(float64); bl {
-				if validData.(float64) == compareDataFloat64 {
-					return nil
-				}
-			}
-		case bool:
-			if compareDataBool, bl := compareData.(bool); bl {
-				if validData.(bool) == compareDataBool {
-					return nil
-				}
-			}
-		default:
-			if reflect.DeepEqual(validData, compareData) {
-				return nil
-			}
+		if Func.IsEqualData(validData, compareData) {
+			return nil
 		}
 		return rs
 	})
@@ -708,5 +687,63 @@ func (v validApi) In(data interface{}, ruleKey string, ruleValue string) error {
 			return rs
 		}
 		return nil
+	})
+}
+
+// 验证数组内的值唯一
+func (v validApi) Unique(data interface{}, ruleKey string) error {
+	starIndex := -1
+	ruleKeyList := strings.Split(ruleKey, ".")
+	for key, rule := range ruleKeyList {
+		if rule == "*" {
+			starIndex = key
+		}
+	}
+	if starIndex+1 == len(ruleKeyList) {
+		starIndex--
+	}
+	if starIndex == -1 {
+		starIndex++
+	}
+	var compareRule string
+	var compareData interface{}
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
+		info := strings.ReplaceAll(Lang.Unique, "{ruleKey}", validNotes)
+		rs := errors.New(info)
+		validRuleList := strings.Split(validRule, ".")
+		beforeRule := strings.Join(validRuleList[0:starIndex], ".")
+		if compareRule == "" {
+			compareRule = beforeRule
+		} else {
+			if !Func.IsEqualData(compareRule, beforeRule) {
+				compareRule = beforeRule
+				compareData = nil
+			}
+		}
+		if compareData == nil {
+			compareData = validData
+		} else {
+			if Func.IsEqualData(compareData, validData) {
+				return rs
+			}
+		}
+		return nil
+	})
+}
+
+// 正则表达式
+func (v validApi) Regexp(data interface{}, ruleKey string, ruleValue string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
+		info := strings.ReplaceAll(Lang.Regexp, "{ruleKey}", validNotes)
+		rs := errors.New(info)
+		validDataString, bl := validData.(string)
+		if !bl {
+			return rs
+		}
+		reg := regexp.MustCompile(ruleValue)
+		if reg.MatchString(validDataString) {
+			return nil
+		}
+		return rs
 	})
 }
