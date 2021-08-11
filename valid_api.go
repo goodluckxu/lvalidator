@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 type validApi struct {
@@ -192,7 +193,7 @@ func (v validApi) Len(data interface{}, ruleKey string, ruleValue string) error 
 		}
 		switch validData.(type) {
 		case string:
-			if len(validData.(string)) == int(ruleValueFloat64) {
+			if utf8.RuneCountInString(validData.(string)) == int(ruleValueFloat64) {
 				return nil
 			}
 		case []interface{}:
@@ -216,7 +217,7 @@ func (v validApi) Min(data interface{}, ruleKey string, ruleValue string) error 
 		}
 		switch validData.(type) {
 		case string:
-			if len(validData.(string)) >= int(ruleValueFloat64) {
+			if utf8.RuneCountInString(validData.(string)) >= int(ruleValueFloat64) {
 				return nil
 			}
 		case []interface{}:
@@ -240,7 +241,7 @@ func (v validApi) Max(data interface{}, ruleKey string, ruleValue string) error 
 		}
 		switch validData.(type) {
 		case string:
-			if len(validData.(string)) <= int(ruleValueFloat64) {
+			if utf8.RuneCountInString(validData.(string)) <= int(ruleValueFloat64) {
 				return nil
 			}
 		case []interface{}:
