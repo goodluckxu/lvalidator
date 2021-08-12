@@ -46,7 +46,7 @@ func(validData interface{},validNotes string) error {
 
 ## 所有验证类型
 
-###通用验证
+### 通用验证
 [valid_condition_field](#valid_condition_field) |
 [required](#required) |
 [len](#len) |
@@ -59,14 +59,14 @@ func(validData interface{},validNotes string) error {
 [in](#in) |
 [unique](#unique) |
 [regexp](#regexp)
-###类型验证
+### 类型验证
 [array](#array) |
 [map](#map) |
 [string](#string) |
 [number](#number) |
 [integer](#integer) |
 [bool](#bool)
-###比较验证
+### 比较验证
 [gt](#gt) |
 [gte](#gte) |
 [lt](#lt) |
@@ -75,7 +75,7 @@ func(validData interface{},validNotes string) error {
 [date_gte](#date_gte) |
 [date_lt](#date_lt) |
 [date_lte](#date_lte)
-###字段验证
+### 字段验证
 [eq_field](#eq_field)
 
 ## 所有验证规则
