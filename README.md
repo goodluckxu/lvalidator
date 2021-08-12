@@ -44,34 +44,41 @@ func(validData interface{},validNotes string) error {
 }
 ~~~
 
-## 所有验证规则
+## 所有验证类型
+
+###通用验证
 [valid_condition_field](#valid_condition_field) |
 [required](#required) |
-[array](#array) |
-[map](#map) |
-[string](#string) |
 [len](#len) |
 [min](#min) |
 [max](#max) |
-[number](#number) |
-[integer](#integer) |
-[bool](#bool) |
-[gt](#gt) |
-[gte](#gte) |
-[lt](#lt) |
-[lte](#lte) |
 [date](#date) |
 [date_format](#date_format) |
-[date_gt](#date_gt) |
-[date_gte](#date_gte) |
-[date_lt](#date_lt) |
-[date_lte](#date_lte) |
-[eq_field](#eq_field) |
 [email](#email) |
 [phone](#phone) |
 [in](#in) |
 [unique](#unique) |
 [regexp](#regexp)
+###类型验证
+[array](#array) |
+[map](#map) |
+[string](#string) |
+[number](#number) |
+[integer](#integer) |
+[bool](#bool)
+###比较验证
+[gt](#gt) |
+[gte](#gte) |
+[lt](#lt) |
+[lte](#lte) |
+[date_gt](#date_gt) |
+[date_gte](#date_gte) |
+[date_lt](#date_lt) |
+[date_lte](#date_lte)
+###字段验证
+[eq_field](#eq_field)
+
+## 所有验证规则
 
 #### <a id="valid_condition_field">valid_condition_field规则</a>
 如果条件满足则验证后面的规则，field为传入字段，condition为条件
