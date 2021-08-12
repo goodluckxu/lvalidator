@@ -737,6 +737,9 @@ func (v validApi) Regexp(data interface{}, ruleKey string, ruleValue string) err
 	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		info := strings.ReplaceAll(Lang.Regexp, "{ruleKey}", validNotes)
 		rs := errors.New(info)
+		if validData == nil {
+			return nil
+		}
 		validDataString, bl := validData.(string)
 		if !bl {
 			return rs
