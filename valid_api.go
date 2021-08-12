@@ -265,14 +265,17 @@ func (v validApi) Number(data interface{}, ruleKey string) error {
 		case float64:
 			return nil
 		case string:
+			dataValue := reflect.ValueOf(data)
+			if dataValue.Kind() == reflect.Ptr {
+				dataValue = dataValue.Elem()
+			}
+			if dataValue.Kind() == reflect.Struct {
+				return rs
+			}
 			if number, err := strconv.ParseFloat(validData.(string), 64); err == nil {
 				newData := handle_interface.UpdateInterface(reflect.ValueOf(data).Elem().Interface(), []handle_interface.Rule{
 					{FindField: validRule, UpdateValue: number},
 				})
-				dataValue := reflect.ValueOf(data)
-				if dataValue.Kind() == reflect.Ptr {
-					dataValue = dataValue.Elem()
-				}
 				dataValue.Set(reflect.ValueOf(newData))
 				return nil
 			}
@@ -296,15 +299,17 @@ func (v validApi) Integer(data interface{}, ruleKey string) error {
 				return nil
 			}
 		case string:
-			dataInt, err := strconv.ParseInt(validData.(string), 10, 64)
-			if err == nil {
+			dataValue := reflect.ValueOf(data)
+			if dataValue.Kind() == reflect.Ptr {
+				dataValue = dataValue.Elem()
+			}
+			if dataValue.Kind() == reflect.Struct {
+				return rs
+			}
+			if dataInt, err := strconv.ParseInt(validData.(string), 10, 64); err == nil {
 				newData := handle_interface.UpdateInterface(reflect.ValueOf(data).Elem().Interface(), []handle_interface.Rule{
 					{FindField: validRule, UpdateValue: float64(dataInt)},
 				})
-				dataValue := reflect.ValueOf(data)
-				if dataValue.Kind() == reflect.Ptr {
-					dataValue = dataValue.Elem()
-				}
 				dataValue.Set(reflect.ValueOf(newData))
 				return nil
 			}
