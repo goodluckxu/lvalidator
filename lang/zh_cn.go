@@ -5,7 +5,6 @@ type ZhCn struct {
 }
 
 func (z *ZhCn) Init() {
-	z.Error = "验证值错误。规则：{rule}:{ruleValue}，错误：{error}"
 	z.Required = "{ruleKey}为必填项"
 	z.Array = "{ruleKey}必须是数组"
 	z.Map = "{ruleKey}必须是对象"
@@ -32,4 +31,12 @@ func (z *ZhCn) Init() {
 	z.In = "{ruleKey}必须在数组({ruleValue})中"
 	z.Unique = "{ruleKey}重复"
 	z.Regexp = "{ruleKey}验证错误"
+	z.GtField = "{ruleKey}必须大于{ruleValue}"
+	z.GteField = "{ruleKey}必须大于等于{ruleValue}"
+	z.LtField = "{ruleKey}必须小于{ruleValue}"
+	z.LteField = "{ruleKey}必须小于等于{ruleValue}"
+	z.DateGtField = "{ruleKey}必须大于{ruleValue}"
+	z.DateGteField = "{ruleKey}必须大于等于{ruleValue}"
+	z.DateLtField = "{ruleKey}必须小于{ruleValue}"
+	z.DateLteField = "{ruleKey}必须小于等于{ruleValue}"
 }

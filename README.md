@@ -47,7 +47,6 @@ func(validData interface{},validNotes string) error {
 ## 所有验证类型
 
 ### 通用验证
-[valid_condition_field](#valid_condition_field) |
 [required](#required) |
 [len](#len) |
 [min](#min) |
@@ -76,7 +75,16 @@ func(validData interface{},validNotes string) error {
 [date_lt](#date_lt) |
 [date_lte](#date_lte)
 ### 字段验证
-[eq_field](#eq_field)
+[valid_condition_field](#valid_condition_field) |
+[eq_field](#eq_field) |
+[gt_field](#gt_field) |
+[gte_field](#gte_field) |
+[lt_field](#lt_field) |
+[lte_field](#lte_field) |
+[date_gt_field](#date_gt_field) |
+[date_gte_field](#date_gte_field) |
+[date_lt_field](#date_lt_field) |
+[date_lte_field](#date_lte_field)
 
 ## 所有验证规则
 
@@ -243,4 +251,52 @@ unique
 验证正则表达式
 ~~~
 regexp:^\d$
+~~~
+
+#### <a id="gt_field">gt_field规则</a>
+验证是否大于某个字段。可验证数字和字符串的数字
+~~~
+gt_field:field
+~~~
+
+#### <a id="gte_field">gte_field规则</a>
+验证是否大于等于某个字段。可验证数字和字符串的数字
+~~~
+gte_field:field
+~~~
+
+#### <a id="lt_field">lt_field规则</a>
+验证是否小于某个字段。可验证数字和字符串的数字
+~~~
+lt_field:field
+~~~
+
+#### <a id="lte_field">lte_field规则</a>
+验证是否小于等于某个字段。可验证数字和字符串的数字
+~~~
+lte_field:field
+~~~
+
+#### <a id="date_gt_field">date_gt_field规则</a>
+验证日期是否大于某个字段
+~~~
+date_gt_field:field
+~~~
+
+#### <a id="date_gte_field">date_gte_field规则</a>
+验证日期是否大于等于某个字段
+~~~
+date_gte_field:field
+~~~
+
+#### <a id="date_lt_field">date_lt_field规则</a>
+验证日期是否小于某个字段
+~~~
+date_lt_field:field
+~~~
+
+#### <a id="date_lte_field">date_lte_field规则</a>
+验证日期是否小于等于某个字段
+~~~
+date_lte_field:field
 ~~~

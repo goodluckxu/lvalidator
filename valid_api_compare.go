@@ -2,6 +2,7 @@ package lvalidator
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -121,18 +122,15 @@ func (v validApi) Lte(data interface{}, ruleKey string, ruleValue string) error 
 // 日期大于
 func (v validApi) DateGt(data interface{}, ruleKey string, ruleValue string) error {
 	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
-		ruleValueTime, err := Func.TimeParse(ruleValue)
-		if err != nil {
-			info := strings.ReplaceAll(Lang.Error, "{rule}", "date_gt")
-			info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
-			info = strings.ReplaceAll(info, "{error}", err.Error())
-			return errors.New(info)
-		}
 		info := strings.ReplaceAll(Lang.DateGt, "{ruleKey}", validNotes)
 		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
 		rs := errors.New(info)
 		if validData == nil {
 			return nil
+		}
+		ruleValueTime, err := Func.TimeParse(ruleValue)
+		if err != nil {
+			return errors.New(fmt.Sprintf("date_gt:%s不是一个正确的规则", ruleValue))
 		}
 		validDataString, bl := validData.(string)
 		if !bl {
@@ -152,18 +150,15 @@ func (v validApi) DateGt(data interface{}, ruleKey string, ruleValue string) err
 // 日期大于等于
 func (v validApi) DateGte(data interface{}, ruleKey string, ruleValue string) error {
 	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
-		ruleValueTime, err := Func.TimeParse(ruleValue)
-		if err != nil {
-			info := strings.ReplaceAll(Lang.Error, "{rule}", "date_gt")
-			info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
-			info = strings.ReplaceAll(info, "{error}", err.Error())
-			return errors.New(info)
-		}
 		info := strings.ReplaceAll(Lang.DateGte, "{ruleKey}", validNotes)
 		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
 		rs := errors.New(info)
 		if validData == nil {
 			return nil
+		}
+		ruleValueTime, err := Func.TimeParse(ruleValue)
+		if err != nil {
+			return errors.New(fmt.Sprintf("date_gte:%s不是一个正确的规则", ruleValue))
 		}
 		validDataString, bl := validData.(string)
 		if !bl {
@@ -183,18 +178,15 @@ func (v validApi) DateGte(data interface{}, ruleKey string, ruleValue string) er
 // 日期小于
 func (v validApi) DateLt(data interface{}, ruleKey string, ruleValue string) error {
 	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
-		ruleValueTime, err := Func.TimeParse(ruleValue)
-		if err != nil {
-			info := strings.ReplaceAll(Lang.Error, "{rule}", "date_gt")
-			info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
-			info = strings.ReplaceAll(info, "{error}", err.Error())
-			return errors.New(info)
-		}
 		info := strings.ReplaceAll(Lang.DateLt, "{ruleKey}", validNotes)
 		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
 		rs := errors.New(info)
 		if validData == nil {
 			return nil
+		}
+		ruleValueTime, err := Func.TimeParse(ruleValue)
+		if err != nil {
+			return errors.New(fmt.Sprintf("date_lt:%s不是一个正确的规则", ruleValue))
 		}
 		validDataString, bl := validData.(string)
 		if !bl {
@@ -214,18 +206,15 @@ func (v validApi) DateLt(data interface{}, ruleKey string, ruleValue string) err
 // 日期小于等于
 func (v validApi) DateLte(data interface{}, ruleKey string, ruleValue string) error {
 	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
-		ruleValueTime, err := Func.TimeParse(ruleValue)
-		if err != nil {
-			info := strings.ReplaceAll(Lang.Error, "{rule}", "date_gt")
-			info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
-			info = strings.ReplaceAll(info, "{error}", err.Error())
-			return errors.New(info)
-		}
 		info := strings.ReplaceAll(Lang.DateLte, "{ruleKey}", validNotes)
 		info = strings.ReplaceAll(info, "{ruleValue}", ruleValue)
 		rs := errors.New(info)
 		if validData == nil {
 			return nil
+		}
+		ruleValueTime, err := Func.TimeParse(ruleValue)
+		if err != nil {
+			return errors.New(fmt.Sprintf("date_lte:%s不是一个正确的规则", ruleValue))
 		}
 		validDataString, bl := validData.(string)
 		if !bl {
