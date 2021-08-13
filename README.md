@@ -14,7 +14,7 @@ err := valid.ValidJson(map[string]interface{}{
         "sort:2",
         "notes:飞机",
         "date",
-        func(value interface{}) error {
+        func(validData  interface{}) error {
             return nil
         },
     },
