@@ -42,7 +42,7 @@ func (f Function) parseRules(rules map[string]interface{}) ([]map[string]interfa
 		default:
 			return nil, errors.New("规格类型不正确")
 		}
-		sort := ""
+		sort := 0
 		notes := ""
 		newList := []interface{}{}
 		for _, v := range list {
@@ -61,7 +61,7 @@ func (f Function) parseRules(rules map[string]interface{}) ([]map[string]interfa
 				}
 				switch vList[0] {
 				case "sort":
-					sort = vList[1]
+					sort, _ = strconv.Atoi(vList[1])
 				case "notes":
 					notes = vList[1]
 				}
@@ -95,11 +95,16 @@ func (f Function) readBody(r *http.Request) []byte {
 }
 
 // 排序[]map[string]interface{}
-func (f Function) sortSliceMapStringInterface(data []map[string]interface{}, args ...string) {
+// sortSliceMapStringInterface 排序[]map[string]interface{}
+func (f Function) sortSliceMapStringInterface(data []map[string]interface{}, args ...string) (rs []map[string]interface{}) {
+	rs = []map[string]interface{}{}
 	if len(args) == 0 {
 		return
 	}
-	lenData := len(data)
+	for _, v := range data {
+		rs = append(rs, v)
+	}
+	lenData := len(rs)
 	for i := 0; i < lenData-1; i++ {
 		for j := 0; j < lenData-1-i; j++ {
 			for _, arg := range args {
@@ -109,20 +114,85 @@ func (f Function) sortSliceMapStringInterface(data []map[string]interface{}, arg
 				if len(argList) > 1 {
 					sortType = argList[1]
 				}
-				strJ := f.formatNumber(data[j][field])
-				strJAdd := f.formatNumber(data[j+1][field])
-				compareStr := strings.Compare(strJ, strJAdd)
+				jY := rs[j][field]
+				jYAdd := rs[j+1][field]
+				var floatJ float64
+				var floatJAdd float64
+				isFloat := false
+				switch jY.(type) {
+				// case uint, uint8, uint16, uint32, uint64, int, int8, int16, int32, int64, float32, float64:
+				case uint:
+					floatJ = float64(jY.(uint))
+					floatJAdd = float64(jYAdd.(uint))
+					isFloat = true
+				case uint8:
+					floatJ = float64(jY.(uint8))
+					floatJAdd = float64(jYAdd.(uint8))
+					isFloat = true
+				case uint16:
+					floatJ = float64(jY.(uint16))
+					floatJAdd = float64(jYAdd.(uint16))
+					isFloat = true
+				case uint32:
+					floatJ = float64(jY.(uint32))
+					floatJAdd = float64(jYAdd.(uint32))
+					isFloat = true
+				case uint64:
+					floatJ = float64(jY.(uint64))
+					floatJAdd = float64(jYAdd.(uint64))
+					isFloat = true
+				case int:
+					floatJ = float64(jY.(int))
+					floatJAdd = float64(jYAdd.(int))
+					isFloat = true
+				case int8:
+					floatJ = float64(jY.(int8))
+					floatJAdd = float64(jYAdd.(int8))
+					isFloat = true
+				case int16:
+					floatJ = float64(jY.(int16))
+					floatJAdd = float64(jYAdd.(int16))
+					isFloat = true
+				case int32:
+					floatJ = float64(jY.(int32))
+					floatJAdd = float64(jYAdd.(int32))
+					isFloat = true
+				case int64:
+					floatJ = float64(jY.(int64))
+					floatJAdd = float64(jYAdd.(int64))
+					isFloat = true
+				case float32:
+					floatJ = float64(jY.(float32))
+					floatJAdd = float64(jYAdd.(float32))
+					isFloat = true
+				case float64:
+					floatJ = jY.(float64)
+					floatJAdd = jYAdd.(float64)
+					isFloat = true
+				}
+				compareStr := 0
+				if isFloat {
+					if floatJ > floatJAdd {
+						compareStr = 1
+					} else if floatJ < floatJAdd {
+						compareStr = -1
+					}
+				} else {
+					strJ := f.formatNumber(jY)
+					strJAdd := f.formatNumber(jYAdd)
+					compareStr = strings.Compare(strJ, strJAdd)
+				}
 				if compareStr == 0 {
 					continue
 				}
 				if sortType == "asc" && compareStr == 1 {
-					temp := data[j]
-					data[j] = data[j+1]
-					data[j+1] = temp
+					temp := rs[j]
+					rs[j] = rs[j+1]
+					rs[j+1] = temp
 				} else if sortType == "desc" && compareStr == -1 {
-					temp := data[j]
-					data[j] = data[j+1]
-					data[j+1] = temp
+					temp := rs[j]
+					rs[j] = rs[j+1]
+					rs[j+1] = temp
 				}
 				break
 			}
