@@ -43,6 +43,10 @@ func (v validApi) Required(data interface{}, ruleKey string, ruleValue string) e
 			if len(validData.([]interface{})) == 0 && ruleValue != "array" {
 				return rs
 			}
+		case map[string]interface{}:
+			if len(validData.(map[string]interface{})) == 0 && ruleValue != "map" {
+				return rs
+			}
 		}
 		return nil
 	})
