@@ -97,8 +97,8 @@ valid_condition_field:field,condition
 ~~~
 
 #### <a id="required">required规则</a>
-验证是否必填。null，字符串为""，数字类型为0，bool类型为false，数组为[]都不通过
-参数为string,number,bool,array，代表string为空不验证，number为0不验证，bool为false不验证,array为[]不验证
+验证是否必填。null，字符串为""，数字类型为0，bool类型为false，数组为[]，map为{}都不通过
+参数为string,number,bool,array,map，代表string为空不验证，number为0不验证，bool为false不验证,array为[]不验证,map为{}不验证
 ~~~
 required:number
 ~~~
