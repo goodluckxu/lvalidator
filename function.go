@@ -77,7 +77,7 @@ func (f Function) parseRules(rules map[string]interface{}) ([]map[string]interfa
 		ruleMap["list"] = newList
 		ruleList = append(ruleList, ruleMap)
 	}
-	f.sortSliceMapStringInterface(ruleList, "sort")
+	ruleList = f.sortSliceMapStringInterface(ruleList, "sort")
 	return ruleList, nil
 }
 
