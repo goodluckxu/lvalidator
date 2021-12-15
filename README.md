@@ -48,6 +48,7 @@ func(validData interface{},validNotes string) error {
 
 ### 通用验证
 [required](#required) |
+[nullable](#nullable) |
 [len](#len) |
 [min](#min) |
 [max](#max) |
@@ -101,6 +102,12 @@ valid_condition_field:field,condition
 参数为string,number,bool,array,map，代表string为空不验证，number为0不验证，bool为false不验证,array为[]不验证,map为{}不验证
 ~~~
 required:number
+~~~
+
+#### <a id="nullable">nullable规则</a>
+数据为空则不验证后面的规则，字符串为""，数字类型为0，bool类型为false，数组为[]，map为{}都不验证后的单规则
+~~~
+nullable
 ~~~
 
 #### <a id="array">array规则</a>

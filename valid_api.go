@@ -52,6 +52,43 @@ func (v validApi) Required(data interface{}, ruleKey string, ruleValue string) e
 	})
 }
 
+// 验证为空不验证
+func (v validApi) Nullable(data interface{}, ruleKey string, ruleValue string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
+		isNull := false
+		if validData == nil {
+			isNull = true
+		} else {
+			switch validData.(type) {
+			case string:
+				if validData.(string) == "" {
+					isNull = true
+				}
+			case float64:
+				if validData.(float64) == 0 {
+					isNull = true
+				}
+			case bool:
+				if validData.(bool) == false {
+					isNull = true
+				}
+			case []interface{}:
+				if len(validData.([]interface{})) == 0 {
+					isNull = true
+				}
+			case map[string]interface{}:
+				if len(validData.(map[string]interface{})) == 0 {
+					isNull = true
+				}
+			}
+		}
+		if isNull {
+			return nil
+		}
+		return errors.New("")
+	})
+}
+
 // 验证长度相等
 func (v validApi) Len(data interface{}, ruleKey string, ruleValue string) error {
 	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
