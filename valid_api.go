@@ -2,6 +2,7 @@ package lvalidator
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -17,6 +18,23 @@ type validApi struct {
 // 传值 ruleKey 验证的字段
 // 传值 ruleValue 需要验证的规则(非必传)
 // 返值 error 错误信息
+
+// 验证条件满足通过
+func (v validApi) ValidCondition(data interface{}, ruleKey string, ruleValue string) error {
+	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
+		rs := errors.New(fmt.Sprintf("valid_condition:%s不是一个正确的规则", ruleValue))
+		if validData == nil {
+			return rs
+		}
+		switch ruleValue {
+		case "true", "1":
+			return errors.New("")
+		case "false", "0":
+			return nil
+		}
+		return rs
+	})
+}
 
 // 验证必填
 func (v validApi) Required(data interface{}, ruleKey string, ruleValue string) error {

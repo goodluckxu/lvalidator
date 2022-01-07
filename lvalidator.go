@@ -70,6 +70,7 @@ func (v *Valid) validRule(data interface{}, rule map[string]interface{}) error {
 			if err := v.validStringRule(data, ruleKey, vList[0], vVal); err != nil {
 				if bl, _ := Func.InArray(vList[0], []string{
 					"valid_condition_field",
+					"valid_condition",
 					"nullable",
 				}); bl && err.Error() == "" {
 					continue
@@ -78,6 +79,7 @@ func (v *Valid) validRule(data interface{}, rule map[string]interface{}) error {
 			}
 			if bl, _ := Func.InArray(vList[0], []string{
 				"valid_condition_field",
+				"valid_condition",
 				"nullable",
 			}); bl {
 				return nil
