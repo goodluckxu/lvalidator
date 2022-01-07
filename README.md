@@ -47,6 +47,7 @@ func(validData interface{},validNotes string) error {
 ## 所有验证类型
 
 ### 通用验证
+[valid_condition](#valid_condition) |
 [required](#required) |
 [nullable](#nullable) |
 [len](#len) |
@@ -95,6 +96,12 @@ func(validData interface{},validNotes string) error {
 condition规则为 =,>,>=,<,<=,in，多个条件用&分隔，格式为= 1&< 5&in 12;15
 ~~~
 valid_condition_field:field,condition
+~~~
+
+#### <a id="valid_condition">valid_condition规则</a>
+如果条件满足则验证后面的规则，result为结果，有true,false,1,0四种，其在true,1验证后面数据
+~~~
+valid_condition:result
 ~~~
 
 #### <a id="required">required规则</a>
