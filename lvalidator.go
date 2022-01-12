@@ -21,17 +21,17 @@ func New(r *http.Request) *Valid {
 	return valid
 }
 
-func (v *Valid) ValidJson(rules map[string]interface{}, data interface{}) error {
+func (v *Valid) ValidJson(rules interface{}, data interface{}) error {
 	ruleList, err := Func.parseRules(rules)
 	if err != nil {
 		return err
 	}
 	body := Func.readBody(v.request)
-	if err := json.Unmarshal(body, data); err != nil {
+	if err = json.Unmarshal(body, data); err != nil {
 		return err
 	}
 	for _, rule := range ruleList {
-		err := v.validRule(data, rule)
+		err = v.validRule(data, rule)
 		if err != nil {
 			return err
 		}
@@ -39,18 +39,18 @@ func (v *Valid) ValidJson(rules map[string]interface{}, data interface{}) error 
 	return nil
 }
 
-func (v *Valid) ValidXml(rules map[string]interface{}, data interface{}) error {
+func (v *Valid) ValidXml(rules interface{}, data interface{}) error {
 	ruleList, err := Func.parseRules(rules)
 	if err != nil {
 		return err
 	}
 	body := Func.readBody(v.request)
-	if err := xml.Unmarshal(body, data); err != nil {
+	if err = xml.Unmarshal(body, data); err != nil {
 		return err
 	}
 	newData := reflect.ValueOf(data).Elem().Interface()
 	for _, rule := range ruleList {
-		err := v.validRule(newData, rule)
+		err = v.validRule(newData, rule)
 		if err != nil {
 			return err
 		}

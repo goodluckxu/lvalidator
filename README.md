@@ -21,14 +21,30 @@ err := valid.ValidJson(map[string]interface{}{
     "c": "string|min:2|max:4",
 }, &data)
 ~~~
+或者
+~~~go
+var data interface{}
+valid := lvalidator.New(c.Request)
+err := valid.ValidJson([]lvalidator.RuleRow{
+    {Key: "a", Rules: "required|string", Notes: "测试"},
+	{Key: "b", Rules: []interface{}{
+        "sort:2",
+        "notes:飞机",
+        "date",
+        func(validData  interface{}) error {
+            return nil
+        },
+	}, Notes: "你好"}
+}, &data)
+~~~
 
-## 排序
+## 排序(只适用于map[string]interface{}类型的规格)
 在规则中添加sort如下
 ~~~
 sort:1
 ~~~
 
-## 重定义字段说明
+## 重定义字段说明(只适用于map[string]interface{}类型的规格)
 在规则中添加notes如下
 ~~~
 notes:注释

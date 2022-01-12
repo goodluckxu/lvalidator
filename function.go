@@ -20,7 +20,39 @@ type Function struct {
 }
 
 // 将传入的规格map解析
-func (f Function) parseRules(rules map[string]interface{}) ([]map[string]interface{}, error) {
+func (f Function) parseRules(value interface{}) ([]map[string]interface{}, error) {
+	rules := map[string]interface{}{}
+	switch value.(type) {
+	case map[string]interface{}:
+		rules = value.(map[string]interface{})
+	case []RuleRow:
+		ruleRowList := value.([]RuleRow)
+		for sort, ruleRow := range ruleRowList {
+			var rowRules []interface{}
+			switch ruleRow.Rules.(type) {
+			case string:
+				rowRuleList := strings.Split(ruleRow.Rules.(string), "|")
+				for _, rowRule := range rowRuleList {
+					if strings.HasPrefix(rowRule, "sort:") || strings.HasPrefix(rowRule, "notes:") {
+						return nil, errors.New(fmt.Sprintf("不存在的规则: %s", rowRule))
+					}
+					rowRules = append(rowRules, rowRule)
+				}
+			case []interface{}:
+				rowRuleList, _ := ruleRow.Rules.([]interface{})
+				for _, rowRuleInterface := range rowRuleList {
+					rowRule, _ := rowRuleInterface.(string)
+					if strings.HasPrefix(rowRule, "sort:") || strings.HasPrefix(rowRule, "notes:") {
+						return nil, errors.New(fmt.Sprintf("不存在的规则: %s", rowRule))
+					}
+					rowRules = append(rowRules, rowRuleInterface)
+				}
+			}
+			rowRules = append(rowRules, fmt.Sprintf("sort:%d", sort))
+			rowRules = append(rowRules, fmt.Sprintf("notes:%s", ruleRow.Notes))
+			rules[ruleRow.Key] = rowRules
+		}
+	}
 	ruleList := []map[string]interface{}{}
 	for key, rule := range rules {
 		ruleMap := map[string]interface{}{}
