@@ -28,8 +28,6 @@ valid := lvalidator.New(c.Request)
 err := valid.ValidJson([]lvalidator.RuleRow{
     {Key: "a", Rules: "required|string", Notes: "测试"},
     {Key: "b", Rules: []interface{}{
-        "sort:2",
-        "notes:飞机",
         "date",
         func(validData  interface{}) error {
             return nil
