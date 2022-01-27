@@ -373,6 +373,9 @@ func (f Function) handleValidData(
 	if data == nil {
 		return fn(nil, ruleKey)
 	}
+	if ruleKey == "" {
+		return fn(data, ruleKey)
+	}
 	inputRuleList := strings.Split(inputRule, ".")
 	nowRule := inputRuleList[0]
 	if len(inputRuleList) > 1 {
