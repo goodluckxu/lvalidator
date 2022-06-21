@@ -23,9 +23,6 @@ type validApi struct {
 func (v validApi) ValidCondition(data interface{}, ruleKey string, ruleValue string) error {
 	return Func.ValidData(data, ruleKey, func(validData interface{}, validNotes, validRule string) error {
 		rs := errors.New(fmt.Sprintf("valid_condition:%s不是一个正确的规则", ruleValue))
-		if validData == nil {
-			return rs
-		}
 		switch ruleValue {
 		case "true", "1":
 			return errors.New("")
